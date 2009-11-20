@@ -20,9 +20,9 @@
  */
 
 /**
- * @see Zend_Tool_Framework_Provider_Abstract
+ * @see Zend_Tool_Project_Provider_Abstract
  */
-require_once 'Zend/Tool/Framework/Provider/Abstract.php';
+require_once 'Zend/Tool/Project/Provider/Abstract.php';
 
 /**
  * Provides basic model scaffolding
@@ -32,7 +32,7 @@ require_once 'Zend/Tool/Framework/Provider/Abstract.php';
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Provider_Scaffold extends Zend_Tool_Framework_Provider_Abstract 
+class Galahad_Tool_Project_Provider_Scaffold extends Zend_Tool_Project_Provider_Abstract 
 {
     /**
      * @var array Array
@@ -48,6 +48,9 @@ class Galahad_Tool_Project_Provider_Scaffold extends Zend_Tool_Framework_Provide
     
 	public function create($config, $generateSql = false)
 	{
+	    $this->_loadProfile(self::NO_PROFILE_THROW_EXCEPTION);
+	    
+        /**/
 	    $path = rtrim(getcwd(), DIRECTORY_SEPARATOR);
 	    if (!file_exists($path . '/.zfproject.xml')) {
 	        $this->error("No project found at '{$path}'");
@@ -88,6 +91,9 @@ class Galahad_Tool_Project_Provider_Scaffold extends Zend_Tool_Framework_Provide
 	    }
 	    */
 	}
+	
+	
+	
 	
 	private function _createService($modelName, $path, $options = array())
 	{
@@ -139,10 +145,10 @@ class Galahad_Tool_Project_Provider_Scaffold extends Zend_Tool_Framework_Provide
     	    
     	    $accessors .= "\n\t/**\n\t * Sets the '{$property}' property\n\t * \n\t * @param {$type} \${$prettyProperty}\n\t */"
     	                . "\n\tpublic function set" . ucfirst($prettyProperty) . "({$typeHint}\${$prettyProperty})\n\t{"
-                        . "\n\t\t\$this->_data['{$property}'] = \${$prettyProperty};\n\t}\n";
+                        . "\n\t\t\$this->_setPropertyData('{$property}', \${$prettyProperty});\n\t}\n";
     	    $accessors .= "\n\t/**\n\t * Gets the '{$property}' property\n\t * \n\t * @return {$type}\n\t */"
     	                . "\n\tpublic function get" . ucfirst($prettyProperty) . "()\n\t{"
-                        . "\n\t\treturn \$this->_data['{$property}'];\n\t}\n";
+                        . "\n\t\treturn \$this->_getPropertyData('{$property}');\n\t}\n";
 	    }
 	    
 	    return $accessors;

@@ -67,6 +67,7 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	/**
 	 * Save a Entity in storage
 	 * @param Galahad_Model_Entity $entity
+	 * @return boolean
 	 */
 	abstract public function save(Galahad_Model_Entity $entity);
 	

@@ -20,40 +20,27 @@
  */
 
 /**
- * @see Galahad_Tool_Project_Provider_Scaffold
+ * @see Zend_Tool_Project_Provider_Abstract
  */
-require_once 'Galahad/Tool/Project/Provider/Scaffold.php';
+require_once 'Zend/Tool/Project/Provider/Abstract.php';
 
 /**
- * @see Galahad_Tool_Project_Provider_Model
- */
-require_once 'Galahad/Tool/Project/Provider/Model.php';
-
-/**
- * @see Zend_Tool_Framework_Manifest_ProviderManifestable
- */
-require_once 'Zend/Tool/Framework/Manifest/ProviderManifestable.php';
-
-/**
- * Manifest of Project Providers
+ * Provides basic model scaffolding
  * 
  * @category   Galahad
  * @package    Galahad_Tool
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Provider_Manifest implements Zend_Tool_Framework_Manifest_ProviderManifestable
+class Galahad_Tool_Project_Provider_Model extends Zend_Tool_Project_Provider_Abstract
 {
     /**
-     * getProviders()
+     * create()
      *
-     * @return array Array of Providers
+     * @param string $name
      */
-    public function getProviders()
+    public function create($name, $configFile = null)
     {
-        return array(
-            new Galahad_Tool_Project_Provider_Scaffold(),
-            new Galahad_Tool_Project_Provider_Model(),
-        );
+        echo '@todo - create model';
     }
 }

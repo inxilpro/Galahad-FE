@@ -36,8 +36,79 @@ abstract class Galahad_Model_Entity extends Galahad_Model
     protected $_data = array();
     
     /**
+     * Basic constructor functionality
+     * 
+     * @param array $data
+     */
+    public function __construct(array $data = null)
+    {
+        if (null !== $data) {
+            $this->reset($data);
+        }
+    }
+    
+    /**
+     * Basic persistence functionality
+     * 
+     * @return boolean
+     */
+    public function save()
+    {
+        $dataMapper = $this->getDataMapper();
+        return $dataMapper->save($this);
+    }
+    
+    /**
+     * Resets the entity with new data
+     * 
+     * @param array $data
+     * @return Galahad_Model_Entity
+     */
+    public function reset(array $data)
+    {
+        foreach ($data as $property => $value) {
+            $property = ucfirst(preg_replace_callback('/_([a-z])/', create_function(
+            	'$matches', 
+            	'return strtoupper($matches[1]);'), $property));
+            $method = "set{$property}";
+            $this->$method($value);
+        }
+        
+        return $this;
+    }
+    
+	/**
+     * Gets a Data Mapper object
+     * 
+     * @todo Might want to refactor the get[Object] methods
+     * @param string $name
+     * @return Galahad_Model_DataMapper
+     */
+    public function getDataMapper($name = null)
+    {
+        require_once 'Galahad.php'; // FIXME
+        $namespace = Galahad::getClassNamespace($this);
+        if (null == $name) {
+            $name = Galahad::getClassType($this);
+        } else {
+            $name = ucfirst($name);
+        }
+        
+        $className = "{$namespace}_Model_DataMapper_{$name}";
+        
+        if (!$dataMapper = self::getObjectFromCache($className)) {
+            $dataMapper = new $className();
+            self::addObjectToCache($dataMapper);
+        }
+        
+        return $dataMapper;
+    }
+    
+    /**
      * Gets a form object
      * Defaults to a form with the same name as the Entity
+     * 
+     * @todo Might want to refactor the get[Object] methods
      * @param string $name
      * @return Zend_Form
      */
@@ -54,6 +125,7 @@ abstract class Galahad_Model_Entity extends Galahad_Model
         
         if (!$form = self::getObjectFromCache($className)) {
             $form = new $className();
+            self::addObjectToCache($form);
         }
         
         return $form;
@@ -72,5 +144,33 @@ abstract class Galahad_Model_Entity extends Galahad_Model
         }
         
         return false;
+    }
+    
+    /**
+     * Sets the value for a given property
+     * 
+     * @param string $property
+     * @param mixed $value
+     */
+    protected function _setPropertyData($property, $value)
+    {
+        $this->_data[$property] = $value;
+        return $this;
+    }
+    
+    /**
+     * Gets the value for a given property
+     * Optionally returns a default (null if not set)
+     * 
+     * @param string $property
+     * @param mixed $default
+     */
+    protected function _getPropertyData($property, $default = null)
+    {
+        if (!isset($this->_data[$property])) {
+            return $default;
+        }
+        
+        return $this->_data[$property];
     }
 }

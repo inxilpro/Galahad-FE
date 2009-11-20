@@ -42,7 +42,7 @@ class Galahad
         if (is_object($className)) {
             $className = get_class($className);
         }
-        return substr($className, strrpos($className, _) + 1);
+        return substr($className, strrpos($className, '_') + 1);
     }
 }
 
