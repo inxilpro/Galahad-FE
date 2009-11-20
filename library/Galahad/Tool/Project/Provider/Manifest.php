@@ -22,7 +22,7 @@
 /**
  * @see Galahad_Tool_Project_Provider_Scaffold
  */
-require_once 'Galahad/Tool/Project/Provider/Scaffold.php';
+require_once 'Galahad/Tool/Project/Provider/Models.php';
 
 /**
  * @see Galahad_Tool_Project_Provider_Model
@@ -52,7 +52,7 @@ class Galahad_Tool_Project_Provider_Manifest implements Zend_Tool_Framework_Mani
     public function getProviders()
     {
         return array(
-            new Galahad_Tool_Project_Provider_Scaffold(),
+            new Galahad_Tool_Project_Provider_Models(),
             new Galahad_Tool_Project_Provider_Model(),
         );
     }
