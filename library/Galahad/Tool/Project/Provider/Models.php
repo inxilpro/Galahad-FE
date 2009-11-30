@@ -22,7 +22,12 @@
 /**
  * @see Zend_Tool_Project_Provider_Abstract
  */
-require_once 'Zend/Tool/Project/Provider/Abstract.php';
+require_once 'Galahad/Tool/Project/Provider/Abstract.php';
+
+/**
+ * @see Galahad_Tool_Project_Provider_Model
+ */
+require_once 'Galahad/Tool/Project/Provider/Model.php';
 
 /**
  * Provides basic model scaffolding
@@ -32,38 +37,17 @@ require_once 'Zend/Tool/Project/Provider/Abstract.php';
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Provider_Models extends Zend_Tool_Project_Provider_Abstract 
+class Galahad_Tool_Project_Provider_Models extends Galahad_Tool_Project_Provider_Abstract 
 {
-    /**
-     * @var array Array
-     */
-    private $_noHintTypes = array(
-        'boolean',
-        'integer',
-        'float',
-        'string',
-        'null',
-        'mixed',
-    );
-    
-	public function create($config, $generateSql = false)
-	{
-	    $this->_loadProfile(self::NO_PROFILE_THROW_EXCEPTION);
-	    
-        /**/
-	    $path = rtrim(getcwd(), DIRECTORY_SEPARATOR);
-	    if (!file_exists($path . '/.zfproject.xml')) {
-	        $this->error("No project found at '{$path}'");
-	    }
-	    
-	    $config = $this->_getConfig($config);
-	    $config = $config->toArray();
-	    
-	    $this->_ensureDirectoryStructure($path);
-	    
-	    foreach ($config as $modelName => $section) {
+    public function create($configPath)
+    {
+        $this->_loadProfile(self::NO_PROFILE_THROW_EXCEPTION);
+        $config = $this->_loadConfig($configPath);
+        
+        foreach ($config as $modelName => $section) {
 	        $modelName = ucfirst($modelName);
 	        
+	        /*	        
 	        $this->out('Creating model ', false)
 	             ->out($modelName, true, 'cyan');
 	             
@@ -77,87 +61,18 @@ class Galahad_Tool_Project_Provider_Models extends Zend_Tool_Project_Provider_Ab
             
             $this->_createEntity($modelName, $path, $section);
             $this->_createService($modelName, $path, $section);
+            */
 	    }
-	    
-	    /*
-	    while ("" != $property = $this->in('Enter property name (blank for done):')) {
-	        while ("" == $type = $this->in('Enter property type:')) {}
-	        
-	        $this->out("Create property ", false);
-	        $this->out($property, false, 'cyan');
-	        $this->out(' of type ', false);
-	        $this->out($type, true, 'cyan');
-	        $this->out("");
-	    }
-	    */
-	}
-	
-	
-	
-	
-	private function _createService($modelName, $path, $options = array())
-	{
-	    $filename = "{$path}/application/services/{$modelName}.php";
-        if ($this->_createFile($filename, $this->_generateServiceCode($modelName, $options))) {
-            $this->out('Service file created: ', false)
-                 ->out($filename, true, 'blue');
-        }
-	}
-	
-    private function _generateServiceCode($modelName, array $options)
-	{
-	    $code = "<?php \n\nclass Default_Service_{$modelName} extends Galahad_Service_Abstract\n{\n";
-	    $code .= "}\n\n\n\n";
-	    return $code;
-	}
-	
-	private function _createEntity($modelName, $path, $options = array())
-	{
-	    $filename = "{$path}/application/models/{$modelName}.php";
-        if ($this->_createFile($filename, $this->_generateEntityCode($modelName, $options))) {
-            $this->out('Entity file created: ', false)
-                 ->out($filename, true, 'blue');
-        }
-	}
-	
-    private function _generateEntityCode($modelName, array $options)
-	{
-	    $code = "<?php \n\nclass {$modelName} extends Galahad_Model_Entity\n{\n";
-	    $code .= "\t/**\n\t * Array containing object's properties\n\t * @var array\n\t */\n\tprotected \$_data = array();\n";
-	    $code .= $this->_generateEntityAccessors($options['properties']);
-	    $code .= "}\n\n\n\n";
-	    return $code;
-	}
-	
-	private function _generateEntityAccessors(array $properties)
-	{
-	    $accessors = '';
-	    foreach ($properties as $property => $propertyOptions) {
-	        $type = $propertyOptions['type'];
-    	    $prettyProperty = preg_replace_callback('/_([a-z])/', create_function('$matches', 'return strtoupper($matches[1]);'), $property);
-    	    
-    	    $typeHint = '';
-    	    if (false === strpos($type, '|')) {
-    	        if (!in_array($type, $this->_noHintTypes)) {
-    	            $typeHint = "{$type} ";
-    	        }
-    	    }
-    	    
-    	    $accessors .= "\n\t/**\n\t * Sets the '{$property}' property\n\t * \n\t * @param {$type} \${$prettyProperty}\n\t */"
-    	                . "\n\tpublic function set" . ucfirst($prettyProperty) . "({$typeHint}\${$prettyProperty})\n\t{"
-                        . "\n\t\t\$this->_setPropertyData('{$property}', \${$prettyProperty});\n\t}\n";
-    	    $accessors .= "\n\t/**\n\t * Gets the '{$property}' property\n\t * \n\t * @return {$type}\n\t */"
-    	                . "\n\tpublic function get" . ucfirst($prettyProperty) . "()\n\t{"
-                        . "\n\t\treturn \$this->_getPropertyData('{$property}');\n\t}\n";
-	    }
-	    
-	    return $accessors;
-	}
-	
-	private function _getConfig($configPath)
+    }
+    
+    /**
+     * Loads a Zend_Config implementation
+     * @param string $configPath
+     */
+    private function _loadConfig($configPath)
 	{
 	    if (!file_exists($configPath)) {
-	        $this->error("The file '{$configPath}' does not exist.");
+	        throw new Zend_Tool_Project_Provider_Exception("The file '{$configPath}' does not exist.");
 	    }
 	    
 	    $extension = substr($configPath, -3);
@@ -169,75 +84,9 @@ class Galahad_Tool_Project_Provider_Models extends Zend_Tool_Project_Provider_Ab
             require_once 'Zend/Config/Xml.php';
 	        $config = new Zend_Config_Xml($configPath);
 	    } else {
-	        $this->error('Your configuration file must be either a .xml or .ini file.');
+	        throw new Zend_Tool_Project_Provider_Exception('Your models configuration file must be either a .xml or .ini file.');
 	    }
 	    
 	    return $config;
-	}
-	
-	private function _ensureDirectoryStructure($path = '.')
-	{
-	    $directories = array(
-	        '/application/',
-	        '/application/forms/',
-	        '/application/models/',
-	        '/application/services/',
-	    );
-	    
-	    foreach ($directories as $directory) {
-	        if (!is_dir($path . $directory)) {
-	            if (!mkdir($path . $directory, 0755, true)) {
-	                $this->error("Unable to make directory '{$path}{$directory}'");
-	            }
-	        }
-	    }
-	    
-	    return $this;
-	}
-	
-	private function _createFile($filename, $contents)
-	{
-	    if (file_exists($filename)) {
-            // $this->error("'{$filename}' already exists.  For security reasons this script does not overwrite files.  Please delete this file and try again.");
-            if ('y' != strtolower($this->in("'{$filename}' already exists. Overwrite? [y/N]"))) {
-                return;
-            }
-        }
-        
-        if (!$handle = fopen($filename, 'w')) {
-            $this->error("Cannot open '{$filename}'.  Please check permissions and try again.");
-        }
-        
-	    if (false === fwrite($handle, $contents)) {
-            $this->error("Cannot write to '{$filename}'.  Please check permissions and try again.");
-        }
-        
-        fclose($handle);
-        return $this;
-	}
-	
-	private function out($message, $separator = true, $color = null) 
-	{
-	    $opts = array('separator' => $separator);
-	    if (null !== $color) {
-	        $opts['color'] = $color;
-	    }
-	    
-	    $this->_registry->getResponse()->appendContent($message, $opts);
-	    return $this;
-	}
-	
-	private function in($message)
-	{
-	    return $this->_registry->getClient()->promptInteractiveInput($message)->getContent();
-	}
-	
-	private function error($message, $exception = null)
-	{
-	    require_once 'Zend/Tool/Framework/Client/Console/HelpSystem.php';
-        $helpSystem = new Zend_Tool_Framework_Client_Console_HelpSystem();
-        $helpSystem->setRegistry($this->_registry);
-        $helpSystem->respondWithErrorMessage($message, $exception);
-        exit(1);
 	}
 }
