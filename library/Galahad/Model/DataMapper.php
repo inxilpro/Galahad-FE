@@ -97,7 +97,7 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	
 	/**
 	 * Get the default class name for our DAO
-	 * @return Galahad_Model_DaoInterface 
+	 * @return string 
 	 */
     protected function _getDaoClass()
 	{
