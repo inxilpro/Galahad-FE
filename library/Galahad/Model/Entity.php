@@ -74,7 +74,7 @@ abstract class Galahad_Model_Entity extends Galahad_Model
             	'$matches', 
             	'return strtoupper($matches[1]);'), $property));
             $method = "set{$property}";
-            $this->$method($value);
+            $this->$method($value); // TODO: Check that method exists?
         }
         
         return $this;

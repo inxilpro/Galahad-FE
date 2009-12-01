@@ -151,7 +151,7 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 		if (null == $this->_entityClass) {
 			$namespace = Galahad::getClassNamespace($this);
 		    $modelName = Galahad::getClassType($this);
-			$this->_entityClass =  "{$namespace}_{$modelName}"; // TODO: Should this have Model_ in it?	
+			$this->_entityClass =  "{$namespace}_Model_{$modelName}";	
 		}
 		
 		return $this->_entityClass;

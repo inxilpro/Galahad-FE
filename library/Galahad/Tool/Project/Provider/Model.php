@@ -20,6 +20,11 @@
  */
 
 /**
+ * @see Zend_Filter_Word_CamelCaseToUnderscore
+ */
+require_once 'Zend/Filter/Word/CamelCaseToUnderscore.php';
+
+/**
  * @see Zend_Tool_Project_Provider_Abstract
  */
 require_once 'Galahad/Tool/Project/Provider/Abstract.php';
@@ -40,7 +45,7 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
      * @todo Remember to namespace with Default_ if $module is NULL
      * @param string $name
      */
-    public function create($name, $configFile = null, $module = null)
+    public function create($name, $dbTableIncluded = true, $module = null)
     {
         $this->_loadProfile(self::NO_PROFILE_THROW_EXCEPTION);
 
@@ -54,12 +59,14 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
 
         try {
             $modelResource = self::createResource($this->_loadedProfile, $name, $module);
+            if ($dbTableIncluded) {
+                $filter = new Zend_Filter_Word_CamelCaseToUnderscore();
+                $tableName = $filter->filter($name);
+                $dbTableResource = Galahad_Tool_Project_Provider_DbTable::createResource($this->_loadedProfile, $tableName, $module); 
+            }
+            
             // TODO Add Properties via Zend_Tool_Project_Provider_ModelProperty
             /*
-            if ($indexActionIncluded) {
-                $indexActionResource = Zend_Tool_Project_Provider_Action::createResource($this->_loadedProfile, 'index', $name, $module);
-                $indexActionViewResource = Zend_Tool_Project_Provider_View::createResource($this->_loadedProfile, 'index', $name, $module);
-            }
             if ($testingEnabled) {
                 $testModelResource = Zend_Tool_Project_Provider_Test::createApplicationResource($this->_loadedProfile, $name, 'index', $module);
             }
@@ -72,6 +79,12 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
 
         $this->_registry->getResponse()->appendContent('Creating a model at ' . $modelResource->getContext()->getPath());
         $modelResource->create();
+        
+        if (isset($dbTableResource)) {
+            $this->_registry->getResponse()->appendContent('Creating DbTable for model ' . $name
+                . ' at ' . $dbTableResource->getContext()->getPath());
+            $dbTableResource->create();
+        }
         
         /*
         if (isset($indexActionResource)) {
@@ -106,15 +119,6 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
 
         $modelsDirectory = self::_getModelsDirectoryResource($profile, $moduleName);
         if (false == $modelsDirectory) {
-            // TODO: Should this be an exception or continue to return false?
-            /**
-            if ($moduleName) {
-                $exceptionMessage = 'A model directory for module "' . $moduleName . '" was not found.';
-            } else {
-                $exceptionMessage = 'A model directory was not found.';
-            }
-            throw new Zend_Tool_Project_Provider_Exception($exceptionMessage);
-            */
             return false;
         }
         return (($modelsDirectory->search(array('modelFile' => array('modelName' => $modelName)))) instanceof Zend_Tool_Project_Profile_Resource);
@@ -137,6 +141,7 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
         }
 
         if (!($modelsDirectory = self::_getModelsDirectoryResource($profile, $moduleName))) {
+            // TODO: Generate models directory?  See DbTable...
             if ($moduleName) {
                 $exceptionMessage = 'A model directory for module "' . $moduleName . '" was not found.';
             } else {

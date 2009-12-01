@@ -30,30 +30,32 @@ require_once 'Zend/Tool/Project/Context/Filesystem/File.php';
 require_once 'Zend/CodeGenerator/Php/File.php';
 
 /**
- * @see Zend_Filter_Word_DashToCamelCase
+ * @see Zend_Filter_Word_UnderscoreToCamelCase
  */
-require_once 'Zend/Filter/Word/DashToCamelCase.php';
+require_once 'Zend/Filter/Word/UnderscoreToCamelCase.php';
 
 /**
- * Context for creating a Galahad-style model
+ * @see Zend_Filter_Word_CamelCaseToUnderscore
+ */
+require_once 'Zend/Filter/Word/CamelCaseToUnderscore.php';
+
+/**
+ * Context for creating a DbTable file
  * 
  * @category   Galahad
  * @package    Galahad_Tool
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Context_ModelFile extends Zend_Tool_Project_Context_Filesystem_File 
+class Galahad_Tool_Project_Context_DbTableFile extends Zend_Tool_Project_Context_Filesystem_File 
 {
     /**
      * @var string
      */
-    protected $_filesystemName = 'modelName';
+    protected $_filesystemName = 'DbTableName';
     
     /** @var string */
-    protected $_tableName = 'modelName';
-    
-    /** @var string */
-    protected $_moduleName = 'Default';
+    protected $_tableName = 'tableName';
     
     /**
      * init()
@@ -62,9 +64,11 @@ class Galahad_Tool_Project_Context_ModelFile extends Zend_Tool_Project_Context_F
      */
     public function init()
     {
-        $this->_moduleName = $this->_resource->getAttribute('moduleName');
-        $this->_modelName = $this->_resource->getAttribute('modelName');
-        $this->_filesystemName = ucfirst($this->_modelName) . '.php';
+        $this->_tableName = $this->_resource->getAttribute('tableName');
+        
+        $filter = new Zend_Filter_Word_UnderscoreToCamelCase();
+        $this->_filesystemName = $filter->filter($this->_tableName) . '.php';
+        
         parent::init();
         return $this;
     }
@@ -77,7 +81,7 @@ class Galahad_Tool_Project_Context_ModelFile extends Zend_Tool_Project_Context_F
     public function getPersistentAttributes()
     {
         return array(
-			'modelName' => $this->getModelName()
+			'tableName' => $this->getTableName()
         );
     }
     
@@ -88,17 +92,17 @@ class Galahad_Tool_Project_Context_ModelFile extends Zend_Tool_Project_Context_F
      */
     public function getName()
     {
-        return 'ModelFile';
+        return 'DbTableFile';
     }
     
     /**
-     * getModelName()
+     * getTableName()
      *
      * @return string
      */
-    public function getModelName()
+    public function getTableName()
     {
-        return $this->_modelName;
+        return $this->_tableName;
     }
   
     /**
@@ -108,48 +112,41 @@ class Galahad_Tool_Project_Context_ModelFile extends Zend_Tool_Project_Context_F
      */
     public function getContents()
     {
-
-        $filter = new Zend_Filter_Word_DashToCamelCase();
+        $moduleName = 'Default';
+        $parent = $this->_resource->getParentResource()->getParentResource()->getParentResource()->getContext();
+        if ($parent instanceof Zend_Tool_Project_Context_Zf_ModuleDirectory) {
+            $moduleName = ucfirst($parent->getModuleName());
+            // $className = ($this->_moduleName ? ucfirst($this->_moduleName) : 'Default');
+        }
         
-        $className = ($this->_moduleName ? ucfirst($this->_moduleName) : 'Default');
-        $className .= '_Model_' . $filter->filter($this->_modelName);
+        $filter = new Zend_Filter_Word_UnderscoreToCamelCase();
+        $className = $moduleName . '_Model_DbTable_' . $filter->filter($this->_tableName);
+        
+        /*
+        $filter = new Zend_Filter_Word_CamelCaseToUnderscore();
+        $tableName = $filter->filter($this->_tableName);
+        */
         
         $codeGenFile = new Zend_CodeGenerator_Php_File(array(
             'fileName' => $this->getPath(),
             'classes' => array(
                 new Zend_CodeGenerator_Php_Class(array(
                     'name' => $className,
-                    'extendedClass' => 'Galahad_Model_Entity',
-                    /*
-                    'methods' => array(
-                        new Zend_CodeGenerator_Php_Method(array(
-                            'name' => 'fixMe',
-                            'body' => '// FIXME',
-                        ))
-                    )
-                    */
-                ))
-            )
+                    'extendedClass' => 'Zend_Db_Table_Abstract',
+                    'properties' => array(
+                        array(
+                            'name' => '_name',
+                            'visibility' => 'protected',
+                            'defaultValue' => $this->_tableName,
+                        ),
+                    ),
+                )),
+            ),
         ));
         
         // store the generator into the registry so that the addProperty command can use the same object later
         Zend_CodeGenerator_Php_File::registerFileCodeGenerator($codeGenFile); // REQUIRES filename to be set
         return $codeGenFile->generate();
-    }
-    
-    /**
-     * addProperty()
-     *
-     * @param string $propertyName
-     * @param array $propertyOptions
-     */
-    public function addProperty($propertyName, $propertyOptions)
-    {
-        // FIXME
-        echo "\nWould create a new property";
-        // $class = $this->getCodeGenerator();
-        // $class->setMethod(array('name' => $propertyName . 'Action', 'body' => '        // action body here'));
-        // file_put_contents($this->getPath(), $codeGenFile->generate());
     }
     
     /**
