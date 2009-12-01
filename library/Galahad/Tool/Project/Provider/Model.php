@@ -54,6 +54,7 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
 
         try {
             $modelResource = self::createResource($this->_loadedProfile, $name, $module);
+            // TODO Add Properties via Zend_Tool_Project_Provider_ModelProperty
             /*
             if ($indexActionIncluded) {
                 $indexActionResource = Zend_Tool_Project_Provider_Action::createResource($this->_loadedProfile, 'index', $name, $module);
@@ -144,7 +145,10 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
             throw new Zend_Tool_Project_Provider_Exception($exceptionMessage);
         }
 
-        $newModel = $modelsDirectory->createResource('modelFile', array('modelName' => $modelName)); // TODO: Pass in properties here
+        $newModel = $modelsDirectory->createResource('modelFile', array(
+        	'modelName' => $modelName, 
+        	'moduleName' => $moduleName
+        ));
 
         return $newModel;
     }

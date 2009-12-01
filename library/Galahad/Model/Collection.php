@@ -19,6 +19,9 @@
  * @version   0.3
  */
 
+/** @see Galahad_Model */
+require_once 'Galahad/Model.php';
+
 /**
  * Provides a basic wrapper around an array of Entities
  * 

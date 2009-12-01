@@ -49,6 +49,12 @@ class Galahad_Tool_Project_Context_ModelFile extends Zend_Tool_Project_Context_F
      */
     protected $_filesystemName = 'modelName';
     
+    /** @var string */
+    protected $_modelName = 'modelName';
+    
+    /** @var string */
+    protected $_moduleName = 'Default';
+    
     /**
      * init()
      *
@@ -56,6 +62,7 @@ class Galahad_Tool_Project_Context_ModelFile extends Zend_Tool_Project_Context_F
      */
     public function init()
     {
+        $this->_moduleName = $this->_resource->getAttribute('moduleName');
         $this->_modelName = $this->_resource->getAttribute('modelName');
         $this->_filesystemName = ucfirst($this->_modelName) . '.php';
         parent::init();
@@ -104,8 +111,8 @@ class Galahad_Tool_Project_Context_ModelFile extends Zend_Tool_Project_Context_F
 
         $filter = new Zend_Filter_Word_DashToCamelCase();
         
-        // TODO: Need to set Module name here
-        $className = 'Model_' . $filter->filter($this->_modelName);
+        $className = ($this->_moduleName ? ucfirst($this->_moduleName) : 'Default');
+        $className .= '_Model_' . $filter->filter($this->_modelName);
         
         $codeGenFile = new Zend_CodeGenerator_Php_File(array(
             'fileName' => $this->getPath(),
@@ -113,12 +120,14 @@ class Galahad_Tool_Project_Context_ModelFile extends Zend_Tool_Project_Context_F
                 new Zend_CodeGenerator_Php_Class(array(
                     'name' => $className,
                     'extendedClass' => 'Galahad_Model_Entity',
+                    /*
                     'methods' => array(
                         new Zend_CodeGenerator_Php_Method(array(
                             'name' => 'fixMe',
-                            'body' => '/* FIXME */',
+                            'body' => '// FIXME',
                         ))
                     )
+                    */
                 ))
             )
         ));
