@@ -20,9 +20,9 @@
  */
 
 /**
- * @see Zend_Filter_Word_CamelCaseToUnderscore
+ * @see Zend_Filter_Word_DashToUnderscore
  */
-require_once 'Zend/Filter/Word/CamelCaseToUnderscore.php';
+require_once 'Zend/Filter/Word/DashToUnderscore.php';
 
 /**
  * @see Zend_Tool_Project_Provider_Abstract
@@ -60,9 +60,9 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
         try {
             $modelResource = self::createResource($this->_loadedProfile, $name, $module);
             if ($dbTableIncluded) {
-                $filter = new Zend_Filter_Word_CamelCaseToUnderscore();
+                $filter = new Zend_Filter_Word_DashToUnderscore();
                 $tableName = $filter->filter($name);
-                $dbTableResource = Galahad_Tool_Project_Provider_DbTable::createResource($this->_loadedProfile, $tableName, $module); 
+                $dbTableResource = Galahad_Tool_Project_Provider_DbTable::createResource($this->_loadedProfile, $tableName, $module);
             }
             
             // TODO Add Properties via Zend_Tool_Project_Provider_ModelProperty

@@ -135,7 +135,8 @@ class Galahad_Tool_Project_Provider_DbTable extends Galahad_Tool_Project_Provide
         $profileSearchParams[] = 'dbTableDirectory';
         $dbTablesDirectory = $profile->search($profileSearchParams);
         
-        if (!$dbTablesDirectory) {
+        if (!$dbTablesDirectory 
+            || (null == $moduleName && $dbTablesDirectory->getParentResource()->getParentResource()->getContext() instanceof Zend_Tool_Project_Context_Zf_ModuleDirectory)) {
             $modelsDirectory = self::_getModelsDirectoryResource($profile, $moduleName);
             $dbTablesDirectory = $modelsDirectory->createResource('dbTableDirectory', array());
             $dbTablesDirectory->create();

@@ -60,7 +60,7 @@ class Galahad_Tool_Project_Context_DbTableFile extends Zend_Tool_Project_Context
     /**
      * init()
      *
-     * @return Galahad_Tool_Project_Context_ModelFile
+     * @return Galahad_Tool_Project_Context_DbTableFile
      */
     public function init()
     {
