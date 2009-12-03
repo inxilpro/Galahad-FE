@@ -55,14 +55,14 @@ require_once 'Zend/Filter/Word/UnderscoreToCamelCase.php';
 require_once 'Galahad/Model/Entity.php';
 
 /**
- * Context for creating a Galahad-style model
+ * Context for creating form elements
  * 
  * @category   Galahad
  * @package    Galahad_Tool
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Project_Context_Interface
+class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Context_Interface
 {
     /**
      * @var Zend_Tool_Project_Profile_Resource
@@ -82,36 +82,35 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
     /**
      * @var string
      */
-    protected $_element
-    = null;
+    protected $_elementName = null;
     
     /**
      * init()
      *
-     * @return Galahad_Tool_Project_Context_ModelPropertyMethods
+     * @return Galahad_Tool_Project_Context_FormElement
      */
     public function init()
     {
-        $this->_propertyName = $this->_resource->getAttribute('propertyName');
+        $this->_elementName = $this->_resource->getAttribute('elementName');
         
         $this->_resource->setAppendable(false);
-        $this->_modelResource = $this->_resource->getParentResource();
-        if (!$this->_modelResource->getContext() instanceof Galahad_Tool_Project_Context_ModelFile) {
+        $this->_formResource = $this->_resource->getParentResource();
+        if (!$this->_formResource->getContext() instanceof Galahad_Tool_Project_Context_FormFile) {
             require_once 'Zend/Tool/Project/Context/Exception.php';
-            throw new Zend_Tool_Project_Context_Exception('ModelPropertyMethods must be a sub resource of a ModelFile');
+            throw new Zend_Tool_Project_Context_Exception('FormElement must be a sub resource of a FormFile');
         }
         
-        $this->_modelPath = $this->_modelResource->getContext()->getPath();
+        $this->_formPath = $this->_formResource->getContext()->getPath();
         
-        // make the ModelFile node appendable so we can tack on the property methods.
+        // make the ModelFile node appendable so we can tack on the element methods.
         $this->_resource->getParentResource()->setAppendable(true);
         
         /*
          * This code block is now commented, its doing to much for init()
          *
-        if ($this->_modelPath != '' && self::hasModelPropertyMethods($this->_modelPath, $this->_propertyName)) {
+        if ($this->_modelPath != '' && self::hasFormElement($this->_modelPath, $this->_elementName)) {
             require_once 'Zend/Tool/Project/Context/Exception.php';
-            throw new Zend_Tool_Project_Context_Exception('An property named ' . $this->_propertyName . 'Property already exists in this model');
+            throw new Zend_Tool_Project_Context_Exception('An element named ' . $this->_elementName . 'Element already exists in this model');
         }
         */
         
@@ -126,7 +125,7 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
     public function getPersistentAttributes()
     {
         return array(
-			'propertyName' => $this->getPropertyName()
+			'elementName' => $this->getElementName()
         );
     }
     
@@ -137,14 +136,14 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
      */
     public function getName()
     {
-        return 'ModelPropertyMethods';
+        return 'FormElement';
     }
     
     /**
      * setResource()
      *
      * @param Zend_Tool_Project_Profile_Resource $resource
-     * @return Galahad_Tool_Project_Context_ModelPropertyMethods
+     * @return Galahad_Tool_Project_Context_FormElement
      */
     public function setResource(Zend_Tool_Project_Profile_Resource $resource)
     {
@@ -153,39 +152,39 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
     }
     
     /**
-     * setPropertyName()
+     * setElementName()
      *
-     * @param string $propertyName
-     * @return Galahad_Tool_Project_Context_ModelPropertyMethods
+     * @param string $elementName
+     * @return Galahad_Tool_Project_Context_FormElement
      */
-    public function setPropertyName($propertyName)
+    public function setElementName($elementName)
     {
-        $this->_propertyName = $propertyName;
+        $this->_elementName = $elementName;
         return $this;
     }
     
     /**
-     * getPropertyName()
+     * getElementName()
      *
      * @return string
      */
-    public function getPropertyName()
+    public function getElementName()
     {
-        return $this->_propertyName;
+        return $this->_elementName;
     }
     
     /**
      * create()
      *
-     * @return Galahad_Tool_Project_Context_ModelPropertyMethods
+     * @return Galahad_Tool_Project_Context_FormElement
      */
     public function create()
     {
-        if (self::createPropertyMethods($this->_modelPath, $this->_propertyName) === false) {
+        if (self::createElementCode($this->_formPath, $this->_elementName) === false) {
             require_once 'Zend/Tool/Project/Context/Exception.php';
             throw new Zend_Tool_Project_Context_Exception(
-                'Could not create property within model ' . $this->_modelPath 
-                . ' with property name ' . $this->_propertyName);
+                'Could not create element within form ' . $this->_formPath 
+                . ' with element name ' . $this->_elementName);
         }
         return $this;
     }
@@ -193,7 +192,7 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
     /**
      * delete()
      *
-     * @return Galahad_Tool_Project_Context_ModelPropertyMethods
+     * @return Galahad_Tool_Project_Context_FormElement
      */
     public function delete()
     {
@@ -202,29 +201,35 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
     }
     
     /**
-     * createPropertyMethod()
+     * createElementMethod()
      *
      * @param string $modelPath
-     * @param string $propertyName
+     * @param string $elementName
      * @param string $body
      * @return true
      */
-    public static function createPropertyMethods($modelPath, $propertyName)
+    public static function createElementCode($formPath, $elementName)
     {
-        if (!file_exists($modelPath)) {
+        if (!file_exists($formPath)) {
             return false;
         }
         
-        $modelCodeGenFile = Zend_CodeGenerator_Php_File::fromReflectedFileName($modelPath, true, true);
+        $formCodeGenFile = Zend_CodeGenerator_Php_File::fromReflectedFileName($formPath, true, true);
+        $initMethod = $formCodeGenFile->getClass()->getMethod('init');
         
+        echo "\n";
+        var_export($initMethod);
+        die("\n\n");
+        
+        /*
         $filter = new Zend_Filter_Word_UnderscoreToCamelCase();
-        $methodName = $filter->filter($propertyName);
+        $methodName = $filter->filter($elementName);
                 
-        $modelCodeGenFile->getClass()->setMethod(array(
+        $formCodeGenFile->getClass()->setMethod(array(
             'name' => 'get' . $methodName,
-            'body' => "\t\treturn \$this->_getPropertyData('{$propertyName}');",
+            'body' => "\t\treturn \$this->_getElementData('{$elementName}');",
             'docblock' => array(
-                'shortDescription' => "Gets the '{$propertyName}' property",
+                'shortDescription' => "Gets the '{$elementName}' element",
                 'tags' => array(
                     'return' => new Zend_CodeGenerator_Php_Docblock_Tag_Return(array(
                         'datatype' => 'mixed',
@@ -234,15 +239,15 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
         ));
         
         $param = strtolower($methodName{0}) . substr($methodName, 1);
-        $modelCodeGenFile->getClass()->setMethod(array(
+        $formCodeGenFile->getClass()->setMethod(array(
             'name' => 'set' . $methodName,
             'parameters' => array(
                 array('name' => $param),
             ),
-            'body' => "\t\t\$this->_setPropertyData('$propertyName', \${$param});"
+            'body' => "\t\t\$this->_setElementData('$elementName', \${$param});"
                     . "\nreturn \$this;",
             'docblock' => array(
-                'shortDescription' => "Sets the '{$propertyName}' property",
+                'shortDescription' => "Sets the '{$elementName}' element",
                 'tags' => array(
                     'param' => new Zend_CodeGenerator_Php_Docblock_Tag_Param(array(
                         'paramname' => $param,
@@ -254,29 +259,34 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
                 ),
             ),
         ));
+        */
         
-        file_put_contents($modelPath, $modelCodeGenFile->generate());
+        file_put_contents($formPath, $formCodeGenFile->generate());
         return true;
     }
     
     /**
-     * hasModelPropertyMethods()
+     * hasFormElement()
      *
      * @param string $modelPath
-     * @param string $propertyName
+     * @param string $elementName
      * @return bool
      */
-    public static function hasPropertyMethods($modelPath, $propertyName)
+    public static function hasElement($modelPath, $elementName)
     {
         if (!file_exists($modelPath)) {
             return false;
         }
         
+        // FIXME Ñ Might need some fancy logic here.
+        
+        /*        
         $filter = new Zend_Filter_Word_UnderscoreToCamelCase();
-        $methodName = $filter->filter($propertyName);
+        $methodName = $filter->filter($elementName);
         
         $modelCodeGenFile = Zend_CodeGenerator_Php_File::fromReflectedFileName($modelPath, true, true);
         $class = $modelCodeGenFile->getClass();
         return ($class->hasMethod('get' . $methodName) && $class->hasMethod('set' . $methodName));
+        */
     }
 }

@@ -40,6 +40,16 @@ require_once 'Galahad/Tool/Project/Provider/ModelProperty.php';
 require_once 'Galahad/Tool/Project/Provider/DbTable.php';
 
 /**
+ * @see Galahad_Tool_Project_Provider_Form
+ */
+require_once 'Galahad/Tool/Project/Provider/Form.php';
+
+/**
+ * @see Galahad_Tool_Project_Provider_Form
+ */
+require_once 'Galahad/Tool/Project/Provider/FormElement.php';
+
+/**
  * @see Zend_Tool_Framework_Manifest_ProviderManifestable
  */
 require_once 'Zend/Tool/Framework/Manifest/ProviderManifestable.php';
@@ -66,6 +76,8 @@ class Galahad_Tool_Project_Provider_Manifest implements Zend_Tool_Framework_Mani
             new Galahad_Tool_Project_Provider_Model(),
             new Galahad_Tool_Project_Provider_ModelProperty(),
             new Galahad_Tool_Project_Provider_DbTable(),
+            new Galahad_Tool_Project_Provider_Form(),
+            new Galahad_Tool_Project_Provider_FormElement(),
         );
     }
 }
