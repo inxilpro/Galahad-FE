@@ -59,6 +59,9 @@ require_once 'Zend/Filter/Word/DashToSeparator.php';
  */
 require_once 'Zend/Form.php';
 
+/** @see Galahad_CodeGenerator_Php_OverwritableClass */
+require_once 'Galahad/CodeGenerator/Php/OverwritableClass.php';
+
 /**
  * Context for creating form elements
  * 
@@ -90,6 +93,16 @@ class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Cont
     protected $_elementName = null;
     
     /**
+     * @var string
+     */
+    protected $_elementType = 'text';
+    
+    /**
+     * @var boolean
+     */
+    protected $_required = false;
+    
+    /**
      * init()
      *
      * @return Galahad_Tool_Project_Context_FormElement
@@ -97,6 +110,8 @@ class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Cont
     public function init()
     {
         $this->_elementName = $this->_resource->getAttribute('elementName');
+        $this->_elementType = $this->_resource->getAttribute('elementType');
+        $this->_required = $this->_resource->getAttribute('required');
         
         $this->_resource->setAppendable(false);
         $this->_formResource = $this->_resource->getParentResource();
@@ -109,15 +124,6 @@ class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Cont
         
         // make the ModelFile node appendable so we can tack on the element methods.
         $this->_resource->getParentResource()->setAppendable(true);
-        
-        /*
-         * This code block is now commented, its doing to much for init()
-         *
-        if ($this->_modelPath != '' && self::hasFormElement($this->_modelPath, $this->_elementName)) {
-            require_once 'Zend/Tool/Project/Context/Exception.php';
-            throw new Zend_Tool_Project_Context_Exception('An element named ' . $this->_elementName . 'Element already exists in this model');
-        }
-        */
         
         return $this;
     }
@@ -185,7 +191,7 @@ class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Cont
      */
     public function create()
     {
-        if (self::createElementCode($this->_formPath, $this->_elementName) === false) {
+        if (self::createElementCode($this->_formPath, $this->_elementName, $this->_elementType, $this->_required) === false) {
             require_once 'Zend/Tool/Project/Context/Exception.php';
             throw new Zend_Tool_Project_Context_Exception(
                 'Could not create element within form ' . $this->_formPath 
@@ -213,7 +219,7 @@ class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Cont
      * @param string $body
      * @return true
      */
-    public static function createElementCode($formPath, $elementName)
+    public static function createElementCode($formPath, $elementName, $elementType = 'text', $required = false)
     {
         if (!file_exists($formPath)) {
             return false;
@@ -228,37 +234,27 @@ class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Cont
         $filter = new Zend_Filter_Word_DashToUnderscore();
         $elementName = $filter->filter($elementName);
         
+        $required = ($required ? 'true' : 'false');
+        
         $body = $initMethod->getBody();
+        $body = preg_replace('/(^|\n)        /', '$1', $body);
         $body .= "\n\n";
         $body .= <<<end_body
-\$this->addElement('text', '{$elementName}', array(
+\$this->addElement('{$elementType}', '{$elementName}', array(
 	'label' => '{$elementLabel}',
-	'required' => false,
-	'filters' => array('StringTrim'),
+	'required' => {$required},
 ));
 		
 end_body;
         
         $initMethod->setBody($body);
         
-        // FIXME
-        require_once 'Galahad/CodeGenerator/Php/OverwritableClass.php';
+        // TODO: When the CodeGenerator lets you overwrite classes, change this
         $overwritableClass = new Galahad_CodeGenerator_Php_OverwritableClass($formCodeGenFile->getClass());
         $overwritableClass->unsetMethod('init');
         $overwritableClass->setMethod($initMethod);
         
         $formCodeGenFile->getClass()->setSourceDirty(true);
-        
-        /*
-        echo "\n\n", $formCodeGenFile->getClass()->generate(), "\n\n-----------------\n\n";
-        die ($overwritableClass->generate() . "\n\n");
-        
-        $file = new Zend_CodeGenerator_Php_File();
-        $file->setClass($overwritableClass);
-        file_put_contents($formPath, $file->generate());
-        
-        // $formCodeGenFile->getClass()->setMethod($initMethod);
-        */
         
         file_put_contents($formPath, $formCodeGenFile->generate());
         return true;

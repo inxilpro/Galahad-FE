@@ -45,7 +45,7 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
      * @todo Remember to namespace with Default_ if $module is NULL
      * @param string $name
      */
-    public function create($name, $dbTableIncluded = true, $module = null)
+    public function create($name, $formIncluded = true, $dbTableIncluded = true, $module = null)
     {
         $this->_loadProfile(self::NO_PROFILE_THROW_EXCEPTION);
 
@@ -60,12 +60,17 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
         try {
             $modelResource = self::createResource($this->_loadedProfile, $name, $module);
             if ($dbTableIncluded) {
+            	// TODO: Do this in db table resource 
                 $filter = new Zend_Filter_Word_DashToUnderscore();
                 $tableName = $filter->filter($name);
                 $dbTableResource = Galahad_Tool_Project_Provider_DbTable::createResource($this->_loadedProfile, $tableName, $module);
             }
+        	if ($formIncluded) {
+                $formResource = Galahad_Tool_Project_Provider_Form::createResource($this->_loadedProfile, $name, $module);
+            }
             
             // TODO Add Properties via Zend_Tool_Project_Provider_ModelProperty
+            // TODO Also add elements to form based on properties
             /*
             if ($testingEnabled) {
                 $testModelResource = Zend_Tool_Project_Provider_Test::createApplicationResource($this->_loadedProfile, $name, 'index', $module);
@@ -85,20 +90,11 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
                 . ' at ' . $dbTableResource->getContext()->getPath());
             $dbTableResource->create();
         }
-        
-        /*
-        if (isset($indexActionResource)) {
-            $this->_registry->getResponse()->appendContent('Creating an index action method in model ' . $name);
-            $indexActionResource->create();
-            $this->_registry->getResponse()->appendContent('Creating a view script for the index action method at ' . $indexActionViewResource->getContext()->getPath());
-            $indexActionViewResource->create();
+    	if (isset($formResource)) {
+            $this->_registry->getResponse()->appendContent('Creating form for model ' . $name
+                . ' at ' . $formResource->getContext()->getPath());
+            $formResource->create();
         }
-        
-        if ($testModelResource) {
-            $this->_registry->getResponse()->appendContent('Creating a model test file at ' . $testModelResource->getContext()->getPath());
-            $testModelResource->create();
-        }
-        */
         
         $this->_storeProfile();
     }

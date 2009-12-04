@@ -43,7 +43,7 @@ class Galahad_Tool_Project_Provider_FormElement extends Galahad_Tool_Project_Pro
      * @param string $moduleName
      * @return Zend_Tool_Project_Profile_Resource
      */
-    public static function createResource(Zend_Tool_Project_Profile $profile, $elementName, $formName, $moduleName = null)
+    public static function createResource(Zend_Tool_Project_Profile $profile, $elementName, $formName, $type = 'text', $required = false, $moduleName = null)
     {
         if (!is_string($elementName)) {
             throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_FormElement::createResource() expects \"elementName\" is the name of a element resource to create.');
@@ -54,7 +54,7 @@ class Galahad_Tool_Project_Provider_FormElement extends Galahad_Tool_Project_Pro
         }
 
         $formFile = self::_getFormFileResource($profile, $formName, $moduleName);   
-        $elementMethod = $formFile->createResource('FormElement', array('elementName' => $elementName));
+        $elementMethod = $formFile->createResource('FormElement', array('elementName' => $elementName, 'elementType' => $type, 'required' => $required));
         return $elementMethod;
     }
 
@@ -110,7 +110,7 @@ class Galahad_Tool_Project_Provider_FormElement extends Galahad_Tool_Project_Pro
      * @param string $formName
      * @param string $module
      */
-    public function create($name, $formName, $module = null)
+    public function create($name, $formName, $type = 'text', $required = false, $module = null)
     {
         $this->_loadProfile();
         
@@ -118,7 +118,7 @@ class Galahad_Tool_Project_Provider_FormElement extends Galahad_Tool_Project_Pro
             throw new Zend_Tool_Project_Provider_Exception('This form (' . $formName . ') already has an element named (' . $name . ')');
         }
         
-        $element = self::createResource($this->_loadedProfile, $name, $formName, $module);
+        $element = self::createResource($this->_loadedProfile, $name, $formName, $type, $required, $module);
         
         $this->_registry->getResponse()->appendContent(
             'Creating a element named ' . $name .

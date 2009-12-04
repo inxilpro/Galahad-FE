@@ -110,7 +110,7 @@ class Galahad_Tool_Project_Provider_ModelProperty extends Galahad_Tool_Project_P
      * @param string $modelName
      * @param string $module
      */
-    public function create($name, $parentModel, $module = null)
+    public function create($name, $parentModel, $addToForm = true, $module = null)
     {
         $this->_loadProfile();
         
@@ -124,24 +124,12 @@ class Galahad_Tool_Project_Provider_ModelProperty extends Galahad_Tool_Project_P
             'Creating a property named ' . $name .
             ' inside model at ' . $propertyMethod->getParentResource()->getContext()->getPath());
         $propertyMethod->create();
-
-        /*
-        if ($viewIncluded) {
-            $viewResource = Galahad_Tool_Project_Provider_View::createResource($this->_loadedProfile, $name, $modelName, $module);
-
-            if ($this->_registry->getRequest()->isPretend()) {
-                $this->_registry->getResponse()->appendContent(
-                    'Would create a view script for the ' . $name . ' property method at ' . $viewResource->getContext()->getPath()
-                    );
-            } else {
-                $this->_registry->getResponse()->appendContent(
-                    'Creating a view script for the ' . $name . ' property method at ' . $viewResource->getContext()->getPath()
-                    );
-                $viewResource->create();
-            }
-
+        
+        if ($addToForm) {
+        	$formElementResource = Galahad_Tool_Project_Provider_FormElement::createResource($this->_loadedProfile, $name, $parentModel, 'text', false, $module);
+			$this->_registry->getResponse()->appendContent('Adding element to associated form for property ' . $name);
+			$formElementResource->create();
         }
-        */
         
         $this->_storeProfile();
     }
