@@ -25,14 +25,14 @@
 require_once 'Galahad/Tool/Project/Provider/Abstract.php';
 
 /**
- * Provides basic model scaffolding
+ * Generates a data mapper object
  * 
  * @category   Galahad
  * @package    Galahad_Tool
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Provider_DbTable extends Galahad_Tool_Project_Provider_Abstract
+class Galahad_Tool_Project_Provider_DataMapper extends Galahad_Tool_Project_Provider_Abstract
 {
     /**
      * create()
@@ -40,7 +40,7 @@ class Galahad_Tool_Project_Provider_DbTable extends Galahad_Tool_Project_Provide
      * @todo Remember to namespace with Default_ if $module is NULL
      * @param string $name
      */
-    public function create($tableName, $module = null)
+    public function create($name, $module = null)
     {
         $this->_loadProfile(self::NO_PROFILE_THROW_EXCEPTION);
 
@@ -48,20 +48,20 @@ class Galahad_Tool_Project_Provider_DbTable extends Galahad_Tool_Project_Provide
         // require_once 'Zend/Tool/Project/Provider/Test.php';
         // $testingEnabled = Zend_Tool_Project_Provider_Test::isTestingEnabled($this->_loadedProfile);
 
-        if (self::hasResource($this->_loadedProfile, $tableName, $module)) {
-            throw new Zend_Tool_Project_Provider_Exception('This project already has a db table named ' . $tableName);
+        if (self::hasResource($this->_loadedProfile, $name, $module)) {
+            throw new Zend_Tool_Project_Provider_Exception('This project already has a data mapper named ' . $name);
         }
 
         try {
-            $dbTableResource = self::createResource($this->_loadedProfile, $tableName, $module);
+            $dataMapperResource = self::createResource($this->_loadedProfile, $name, $module);
         } catch (Exception $e) {
             $response = $this->_registry->getResponse();
             $response->setException($e);
             return;
         }
 
-        $this->_registry->getResponse()->appendContent('Creating a dbTable at ' . $dbTableResource->getContext()->getPath());
-        $dbTableResource->create();
+        $this->_registry->getResponse()->appendContent('Creating a data mapper at ' . $dataMapperResource->getContext()->getPath());
+        $dataMapperResource->create();
         
         $this->_storeProfile();
     }
@@ -70,61 +70,61 @@ class Galahad_Tool_Project_Provider_DbTable extends Galahad_Tool_Project_Provide
      * hasResource()
      *
      * @param Zend_Tool_Project_Profile $profile
-     * @param string $dbTableName
+     * @param string $dataMapperName
      * @param string $moduleName
      * @return Zend_Tool_Project_Profile_Resource
      */
-    public static function hasResource(Zend_Tool_Project_Profile $profile, $tableName, $moduleName = null)
+    public static function hasResource(Zend_Tool_Project_Profile $profile, $dataMapperName, $moduleName = null)
     {
-        if (!is_string($tableName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_DbTable::createResource() expects \"tableName\" is the name of the db table.');
+        if (!is_string($dataMapperName)) {
+            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_DataMapper::createResource() expects \"dataMapperName\" is the name of the data mapper.');
         }
 
-        $dbTablesDirectory = self::_getDbTablesDirectoryResource($profile, $moduleName);
-        if (false == $dbTablesDirectory) {
+        $dataMappersDirectory = self::_getDataMappersDirectoryResource($profile, $moduleName);
+        if (false == $dataMappersDirectory) {
             return false;
         }
 
-        return (($dbTablesDirectory->search(array('dbTableFile' => array('tableName' => $tableName)))) instanceof Zend_Tool_Project_Profile_Resource);
+        return (($dataMappersDirectory->search(array('dataMapperFile' => array('dataMapperName' => $dataMapperName)))) instanceof Zend_Tool_Project_Profile_Resource);
     }
     
 	/**
-     * createResource will create the dbTableFile resource at the appropriate location in the
+     * createResource will create the dataMapperFile resource at the appropriate location in the
      * profile.  NOTE: it is your job to execute the create() method on the resource, as well as
      * store the profile when done.
      *
      * @param Zend_Tool_Project_Profile $profile
-     * @param string $dbTableName
+     * @param string $dataMapperName
      * @param string $moduleName
      * @return Zend_Tool_Project_Profile_Resource
      */
-    public static function createResource(Zend_Tool_Project_Profile $profile, $tableName, $moduleName = null)
+    public static function createResource(Zend_Tool_Project_Profile $profile, $dataMapperName, $moduleName = null)
     {
-        if (!is_string($tableName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Zend_Tool_Project_Provider_DbTable::createResource() expects \"tableName\" is the name of the table.');
+        if (!is_string($dataMapperName)) {
+            throw new Zend_Tool_Project_Provider_Exception('Zend_Tool_Project_Provider_DataMapper::createResource() expects \"dataMapperName\" is the name of the dataMapper.');
         }
 
-        if (!($dbTablesDirectory = self::_getDbTablesDirectoryResource($profile, $moduleName))) {
+        if (!($dataMappersDirectory = self::_getDataMappersDirectoryResource($profile, $moduleName))) {
             if ($moduleName) {
-                $exceptionMessage = 'A dbTable directory for module "' . $moduleName . '" was not found.';
+                $exceptionMessage = 'A dataMapper directory for module "' . $moduleName . '" was not found.';
             } else {
-                $exceptionMessage = 'A dbTable directory was not found.';
+                $exceptionMessage = 'A dataMapper directory was not found.';
             }
             throw new Zend_Tool_Project_Provider_Exception($exceptionMessage);
         }
 
-        $newDbTable = $dbTablesDirectory->createResource('dbTableFile', array('tableName' => $tableName));
-        return $newDbTable;
+        $newDataMapper = $dataMappersDirectory->createResource('dataMapperFile', array('dataMapperName' => $dataMapperName));
+        return $newDataMapper;
     }
     
 	/**
-     * _getDbTablesDirectoryResource()
+     * _getDataMappersDirectoryResource()
      *
      * @param Zend_Tool_Project_Profile $profile
      * @param string $moduleName
      * @return Zend_Tool_Project_Profile_Resource
      */
-    protected static function _getDbTablesDirectoryResource(Zend_Tool_Project_Profile $profile, $moduleName = null)
+    protected static function _getDataMappersDirectoryResource(Zend_Tool_Project_Profile $profile, $moduleName = null)
     {
         $profileSearchParams = array();
 
@@ -132,20 +132,20 @@ class Galahad_Tool_Project_Provider_DbTable extends Galahad_Tool_Project_Provide
             $profileSearchParams = array('modulesDirectory', 'moduleDirectory' => array('moduleName' => $moduleName));
         }
 
-        $profileSearchParams[] = 'dbTableDirectory';
-        $dbTablesDirectory = $profile->search($profileSearchParams);
+        $profileSearchParams[] = 'dataMapperDirectory';
+        $dataMapperDirectory = $profile->search($profileSearchParams);
         
-        if (!$dbTablesDirectory 
-            || (null == $moduleName && $dbTablesDirectory->getParentResource()->getParentResource()->getContext() instanceof Zend_Tool_Project_Context_Zf_ModuleDirectory)) {
+        if (!$dataMapperDirectory 
+            || (null == $moduleName && $dataMapperDirectory->getParentResource()->getParentResource()->getContext() instanceof Zend_Tool_Project_Context_Zf_ModuleDirectory)) {
             $modelsDirectory = self::_getModelsDirectoryResource($profile, $moduleName);
-            $dbTablesDirectory = $modelsDirectory->createResource('dbTableDirectory', array());
-            $dbTablesDirectory->create();
+            $dataMapperDirectory = $modelsDirectory->createResource('dataMapperDirectory', array());
+            $dataMapperDirectory->create();
             
             $projectProfileFile = $profile->search('ProjectProfileFile');
             $projectProfileFile->getContext()->save();
         }
         
-        return $dbTablesDirectory;
+        return $dataMapperDirectory;
     }
     
 	/**
