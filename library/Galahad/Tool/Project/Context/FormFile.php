@@ -125,7 +125,7 @@ class Galahad_Tool_Project_Context_FormFile extends Zend_Tool_Project_Context_Fi
                     'methods' => array(
                 		array(
                 			'name' => 'init',
-                			'body' => "\t\t\\\\ Use the init() method to generate your form",
+                			'body' => "\t\t// Use the init() method to generate your form",
                 		),
                 	),
                 )),

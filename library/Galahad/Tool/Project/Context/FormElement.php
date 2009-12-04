@@ -45,14 +45,19 @@ require_once 'Zend/CodeGenerator/Php/Docblock/Tag/Return.php';
 require_once 'Zend/Reflection/File.php';
 
 /**
- * @see Zend_Filter_Word_DashToCamelCase
+ * @see Zend_Filter_Word_DashToUnderscore
  */
-require_once 'Zend/Filter/Word/UnderscoreToCamelCase.php';
+require_once 'Zend/Filter/Word/DashToUnderscore.php';
 
 /**
- * @see Zend_Filter_Word_DashToCamelCase
+ * @see Zend_Filter_Word_DashToUnderscore
  */
-require_once 'Galahad/Model/Entity.php';
+require_once 'Zend/Filter/Word/DashToSeparator.php';
+
+/**
+ * @see Zend_Form
+ */
+require_once 'Zend/Form.php';
 
 /**
  * Context for creating form elements
@@ -217,48 +222,42 @@ class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Cont
         $formCodeGenFile = Zend_CodeGenerator_Php_File::fromReflectedFileName($formPath, true, true);
         $initMethod = $formCodeGenFile->getClass()->getMethod('init');
         
-        echo "\n";
-        var_export($initMethod);
-        die("\n\n");
+        $filter = new Zend_Filter_Word_DashToSeparator(' ');
+        $elementLabel = ucwords($filter->filter($elementName));
+        
+        $filter = new Zend_Filter_Word_DashToUnderscore();
+        $elementName = $filter->filter($elementName);
+        
+        $body = $initMethod->getBody();
+        $body .= "\n\n";
+        $body .= <<<end_body
+\$this->addElement('text', '{$elementName}', array(
+	'label' => '{$elementLabel}',
+	'required' => false,
+	'filters' => array('StringTrim'),
+));
+		
+end_body;
+        
+        $initMethod->setBody($body);
+        
+        // FIXME
+        require_once 'Galahad/CodeGenerator/Php/OverwritableClass.php';
+        $overwritableClass = new Galahad_CodeGenerator_Php_OverwritableClass($formCodeGenFile->getClass());
+        $overwritableClass->unsetMethod('init');
+        $overwritableClass->setMethod($initMethod);
+        
+        $formCodeGenFile->getClass()->setSourceDirty(true);
         
         /*
-        $filter = new Zend_Filter_Word_UnderscoreToCamelCase();
-        $methodName = $filter->filter($elementName);
-                
-        $formCodeGenFile->getClass()->setMethod(array(
-            'name' => 'get' . $methodName,
-            'body' => "\t\treturn \$this->_getElementData('{$elementName}');",
-            'docblock' => array(
-                'shortDescription' => "Gets the '{$elementName}' element",
-                'tags' => array(
-                    'return' => new Zend_CodeGenerator_Php_Docblock_Tag_Return(array(
-                        'datatype' => 'mixed',
-                    )),
-                ),
-            ),
-        ));
+        echo "\n\n", $formCodeGenFile->getClass()->generate(), "\n\n-----------------\n\n";
+        die ($overwritableClass->generate() . "\n\n");
         
-        $param = strtolower($methodName{0}) . substr($methodName, 1);
-        $formCodeGenFile->getClass()->setMethod(array(
-            'name' => 'set' . $methodName,
-            'parameters' => array(
-                array('name' => $param),
-            ),
-            'body' => "\t\t\$this->_setElementData('$elementName', \${$param});"
-                    . "\nreturn \$this;",
-            'docblock' => array(
-                'shortDescription' => "Sets the '{$elementName}' element",
-                'tags' => array(
-                    'param' => new Zend_CodeGenerator_Php_Docblock_Tag_Param(array(
-                        'paramname' => $param,
-                        'datatype' => 'mixed',
-                    )),
-                    'return' => new Zend_CodeGenerator_Php_Docblock_Tag_Return(array(
-                        'datatype' => 'Galahad_Entity',
-                    )),
-                ),
-            ),
-        ));
+        $file = new Zend_CodeGenerator_Php_File();
+        $file->setClass($overwritableClass);
+        file_put_contents($formPath, $file->generate());
+        
+        // $formCodeGenFile->getClass()->setMethod($initMethod);
         */
         
         file_put_contents($formPath, $formCodeGenFile->generate());
