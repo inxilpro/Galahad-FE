@@ -117,12 +117,67 @@ class Galahad_Tool_Project_Context_DataMapperFile extends Zend_Tool_Project_Cont
         $filter = new Zend_Filter_Word_DashToCamelCase();
         $className = $moduleName . '_Model_DataMapper_' . $filter->filter($this->_dataMapperName);
         
+        /*
+
+        abstract public function fetchAll();
+		abstract public function fetchByPrimary($primaryKey);
+		abstract public function save(Galahad_Model_Entity $entity);
+		abstract public function delete(Galahad_Model_Entity $entity);
+		abstract public function deleteByPrimary($primaryKey);
+		
+        */
+        
         $codeGenFile = new Zend_CodeGenerator_Php_File(array(
             'fileName' => $this->getPath(),
             'classes' => array(
+        		// Zend_CodeGenerator_Php_Parameter::
                 new Zend_CodeGenerator_Php_Class(array(
                     'name' => $className,
                     'extendedClass' => 'Galahad_DataMapper',
+                	'methods' => array(
+                		array(
+                			'name' => 'fetchAll',
+                			'body' => "\t\t// Fetch all entities",
+                		),
+                		array(
+                			'name' => 'fetchByPrimary',
+                			'parameters' => array(
+                				array(
+                					'name' => 'primaryKey',
+                				),
+                			),
+                			'body' => "\t\t// Fetch entities by primary key(s)",
+                		),
+                		array(
+                			'name' => 'save',
+                			'parameters' => array(
+                				array(
+                					'name' => 'entity',
+                					'type' => 'Galahad_Model_Entity',
+                				),
+                			),
+                			'body' => "\t\t// Save entity",
+                		),
+                		array(
+                			'name' => 'delete',
+                			'parameters' => array(
+                				array(
+                					'name' => 'entity',
+                					'type' => 'Galahad_Model_Entity',
+                				),
+                			),
+                			'body' => "\t\t// Delete entity",
+                		),
+                		array(
+                			'name' => 'deleteByPrimary',
+                			'parameters' => array(
+                				array(
+                					'name' => 'primaryKey',
+                				),
+                			),
+                			'body' => "\t\t// Delete entity by primary key",
+                		),
+                	),
                 )),
             ),
         ));
