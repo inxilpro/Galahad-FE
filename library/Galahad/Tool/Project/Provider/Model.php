@@ -45,7 +45,7 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
      * @todo Remember to namespace with Default_ if $module is NULL
      * @param string $name
      */
-    public function create($name, $formIncluded = true, $dbTableIncluded = true, $module = null)
+    public function create($name, $dataMapperIncluded = true, $formIncluded = true, $tableIncluded = true, $module = null)
     {
         $this->_loadProfile(self::NO_PROFILE_THROW_EXCEPTION);
 
@@ -59,7 +59,7 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
 
         try {
             $modelResource = self::createResource($this->_loadedProfile, $name, $module);
-            if ($dbTableIncluded) {
+            if ($tableIncluded) {
             	// TODO: Do this in db table resource 
                 $filter = new Zend_Filter_Word_DashToUnderscore();
                 $tableName = $filter->filter($name);
@@ -67,6 +67,9 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
             }
         	if ($formIncluded) {
                 $formResource = Galahad_Tool_Project_Provider_Form::createResource($this->_loadedProfile, $name, $module);
+            }
+        	if ($dataMapperIncluded) {
+                $dataMapperResource = Galahad_Tool_Project_Provider_DataMapper::createResource($this->_loadedProfile, $name, $module);
             }
             
             // TODO Add Properties via Zend_Tool_Project_Provider_ModelProperty
@@ -94,6 +97,11 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
             $this->_registry->getResponse()->appendContent('Creating form for model ' . $name
                 . ' at ' . $formResource->getContext()->getPath());
             $formResource->create();
+        }
+    	if (isset($dataMapperResource)) {
+            $this->_registry->getResponse()->appendContent('Creating data mapper for model ' . $name
+                . ' at ' . $dataMapperResource->getContext()->getPath());
+            $dataMapperResource->create();
         }
         
         $this->_storeProfile();
