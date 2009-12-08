@@ -222,7 +222,7 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
                 
         $modelCodeGenFile->getClass()->setMethod(array(
             'name' => 'get' . $methodName,
-            'body' => "\t\treturn \$this->_getPropertyData('{$propertyName}');",
+            'body' => "return \$this->_getPropertyData('{$propertyName}');",
             'docblock' => array(
                 'shortDescription' => "Gets the '{$propertyName}' property",
                 'tags' => array(
@@ -239,8 +239,7 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
             'parameters' => array(
                 array('name' => $param),
             ),
-            'body' => "\t\t\$this->_setPropertyData('$propertyName', \${$param});"
-                    . "\nreturn \$this;",
+            'body' => "return \$this->_setPropertyData('$propertyName', \${$param});",
             'docblock' => array(
                 'shortDescription' => "Sets the '{$propertyName}' property",
                 'tags' => array(
