@@ -122,10 +122,40 @@ class Galahad_Tool_Project_Context_DbTableFile extends Zend_Tool_Project_Context
         $filter = new Zend_Filter_Word_UnderscoreToCamelCase();
         $className = $moduleName . '_Model_DbTable_' . $filter->filter($this->_tableName);
         
-        /*
-        $filter = new Zend_Filter_Word_CamelCaseToUnderscore();
-        $tableName = $filter->filter($this->_tableName);
-        */
+        $fetchByPrimaryMethod = <<<end_method
+\$results = call_user_func_array(array(\$this, 'find'), (array) \$primaryKey);
+
+if (1 != count(\$results)) {
+	return false;
+}
+
+\$data = \$results->current()->toArray();
+return \$data;
+end_method;
+
+        $saveMethod = <<<end_method
+\$keyCount = 0;
+\$primary = (array) \$this->_primary;
+foreach (\$primary as \$column) {
+	if (isset(\$data[\$column])) {
+		\$keyCount++;
+	}
+}
+if (\$keyCount > 0 && \$keyCount != count(\$primary)) {
+	throw new LengthException(get_class(\$this) . ' expects ' . count(\$primary) . ' column(s) to be set for the primary key');
+}
+
+if (\$keyCount) {
+	\$where = array();
+	foreach (\$primary as \$column) {
+		\$where[] = \$this->getAdapter()->quoteInto("{\$column} = ?", \$data[\$column]);
+	}
+
+	return \$this->update(\$data, \$where);
+}
+
+return \$this->insert(\$data);
+end_method;
         
         $codeGenFile = new Zend_CodeGenerator_Php_File(array(
             'fileName' => $this->getPath(),
@@ -140,6 +170,50 @@ class Galahad_Tool_Project_Context_DbTableFile extends Zend_Tool_Project_Context
                             'defaultValue' => $this->_tableName,
                         ),
                     ),
+                    'methods' => array(
+                		array(
+                			'name' => 'fetchAll',
+                			'body' => "\t\t// Fetch all rows",
+                		),
+                		array(
+                			'name' => 'fetchByPrimary',
+                			'parameters' => array(
+                				array(
+                					'name' => 'primaryKey',
+                				),
+                			),
+                			'body' => $fetchByPrimaryMethod,
+                		),
+                		array(
+                			'name' => 'save',
+                			'parameters' => array(
+                				array(
+                					'name' => 'entity',
+                					'type' => 'Galahad_Model_Entity',
+                				),
+                			),
+                			'body' => $saveMethod,
+                		),
+                		array(
+                			'name' => 'delete',
+                			'parameters' => array(
+                				array(
+                					'name' => 'entity',
+                					'type' => 'Galahad_Model_Entity',
+                				),
+                			),
+                			'body' => "\t\t// Delete row",
+                		),
+                		array(
+                			'name' => 'deleteByPrimary',
+                			'parameters' => array(
+                				array(
+                					'name' => 'primaryKey',
+                				),
+                			),
+                			'body' => "\t\t// Delete row by primary key(s)",
+                		),
+                	),
                 )),
             ),
         ));

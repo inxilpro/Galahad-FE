@@ -115,17 +115,25 @@ class Galahad_Tool_Project_Context_DataMapperFile extends Zend_Tool_Project_Cont
         }
         
         $filter = new Zend_Filter_Word_DashToCamelCase();
-        $className = $moduleName . '_Model_DataMapper_' . $filter->filter($this->_dataMapperName);
+        $name = $filter->filter($this->_dataMapperName);
+        $className = $moduleName . '_Model_DataMapper_' . $name;
         
-        /*
-
-        abstract public function fetchAll();
-		abstract public function fetchByPrimary($primaryKey);
-		abstract public function save(Galahad_Model_Entity $entity);
-		abstract public function delete(Galahad_Model_Entity $entity);
-		abstract public function deleteByPrimary($primaryKey);
-		
-        */
+        $fetchByPrimaryMethod = <<<end_method
+\$dao = \$this->getDao();
+\$data = \$dao->fetchByPrimary(\$primaryKey);
+        
+if (!\$data) {
+	return false;
+}
+        
+return new {$moduleName}_Model_{$name}(\$data);
+end_method;
+        
+        $saveMethod = <<<end_method
+\$data = \$entity->getData();
+\$dao = \$this->getDao();
+return \$dao->save(\$data);
+end_method;
         
         $codeGenFile = new Zend_CodeGenerator_Php_File(array(
             'fileName' => $this->getPath(),
@@ -146,7 +154,7 @@ class Galahad_Tool_Project_Context_DataMapperFile extends Zend_Tool_Project_Cont
                 					'name' => 'primaryKey',
                 				),
                 			),
-                			'body' => "\t\t// Fetch entities by primary key(s)",
+                			'body' => $fetchByPrimaryMethod,
                 		),
                 		array(
                 			'name' => 'save',
@@ -156,7 +164,7 @@ class Galahad_Tool_Project_Context_DataMapperFile extends Zend_Tool_Project_Cont
                 					'type' => 'Galahad_Model_Entity',
                 				),
                 			),
-                			'body' => "\t\t// Save entity",
+                			'body' => $saveMethod,
                 		),
                 		array(
                 			'name' => 'delete',
