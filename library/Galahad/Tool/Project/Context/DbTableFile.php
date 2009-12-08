@@ -122,6 +122,7 @@ class Galahad_Tool_Project_Context_DbTableFile extends Zend_Tool_Project_Context
         $filter = new Zend_Filter_Word_UnderscoreToCamelCase();
         $className = $moduleName . '_Model_DbTable_' . $filter->filter($this->_tableName);
         
+        // TODO Move these into a parent class to extend
         $fetchByPrimaryMethod = <<<end_method
 \$results = call_user_func_array(array(\$this, 'find'), (array) \$primaryKey);
 
@@ -188,21 +189,11 @@ end_method;
                 			'name' => 'save',
                 			'parameters' => array(
                 				array(
-                					'name' => 'entity',
-                					'type' => 'Galahad_Model_Entity',
+                					'name' => 'data',
+                					'type' => 'array',
                 				),
                 			),
                 			'body' => $saveMethod,
-                		),
-                		array(
-                			'name' => 'delete',
-                			'parameters' => array(
-                				array(
-                					'name' => 'entity',
-                					'type' => 'Galahad_Model_Entity',
-                				),
-                			),
-                			'body' => "\t\t// Delete row",
                 		),
                 		array(
                 			'name' => 'deleteByPrimary',
