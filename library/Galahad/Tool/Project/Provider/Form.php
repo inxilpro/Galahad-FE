@@ -38,6 +38,7 @@ class Galahad_Tool_Project_Provider_Form extends Galahad_Tool_Project_Provider_A
      * create()
      *
      * @todo Remember to namespace with Default_ if $module is NULL
+     * @todo Doesn't quite work with modular structure yet
      * @param string $name
      */
     public function create($formName, $module = null)

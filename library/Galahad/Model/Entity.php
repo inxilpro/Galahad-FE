@@ -82,6 +82,26 @@ abstract class Galahad_Model_Entity extends Galahad_Model
         return $this;
     }
     
+    /**
+     * Gets the model's property data
+     * 
+     * Calls each property's getter so that if you have any
+     * custom logic for that property it will be applied
+     * 
+     * @return array
+     */
+    public function getData()
+    {
+    	$data = array();
+    	$filter = new Zend_Filter_Word_UnderscoreToCamelCase();
+    	foreach ($this->_data as $key => $value) {
+    		$method = 'get' . $filter->filter($key);
+    		$data[$key] = $this->$method(); 
+    	}
+    	
+    	return $data;
+    }
+    
 	/**
      * Gets a Data Mapper object
      * 
