@@ -122,42 +122,6 @@ class Galahad_Tool_Project_Context_DbTableFile extends Zend_Tool_Project_Context
         $filter = new Zend_Filter_Word_UnderscoreToCamelCase();
         $className = $moduleName . '_Model_DbTable_' . $filter->filter($this->_tableName);
         
-        // TODO Move these into a parent class to extend
-        $fetchByPrimaryMethod = <<<end_method
-\$results = call_user_func_array(array(\$this, 'find'), (array) \$primaryKey);
-
-if (1 != count(\$results)) {
-	return false;
-}
-
-\$data = \$results->current()->toArray();
-return \$data;
-end_method;
-
-        $saveMethod = <<<end_method
-\$keyCount = 0;
-\$primary = (array) \$this->_primary;
-foreach (\$primary as \$column) {
-	if (isset(\$data[\$column])) {
-		\$keyCount++;
-	}
-}
-if (\$keyCount > 0 && \$keyCount != count(\$primary)) {
-	throw new LengthException(get_class(\$this) . ' expects ' . count(\$primary) . ' column(s) to be set for the primary key');
-}
-
-if (\$keyCount) {
-	\$where = array();
-	foreach (\$primary as \$column) {
-		\$where[] = \$this->getAdapter()->quoteInto("{\$column} = ?", \$data[\$column]);
-	}
-
-	return \$this->update(\$data, \$where);
-}
-
-return \$this->insert(\$data);
-end_method;
-        
         $codeGenFile = new Zend_CodeGenerator_Php_File(array(
             'fileName' => $this->getPath(),
             'classes' => array(
@@ -171,6 +135,7 @@ end_method;
                             'defaultValue' => $this->_tableName,
                         ),
                     ),
+                    /*
                     'methods' => array(
                 		array(
                 			'name' => 'fetchAll',
@@ -205,6 +170,7 @@ end_method;
                 			'body' => "\t\t// Delete row by primary key(s)",
                 		),
                 	),
+                	*/
                 )),
             ),
         ));
