@@ -36,6 +36,34 @@ abstract class Galahad_Model
     protected static $_objectCache = array();
     
     /**
+     * Gets namespace of class (Default_ or Admin_ for example)
+     * 
+     * @param string $className
+     * @return string
+     */
+	public static function getClassNamespace($className)
+    {
+        if (is_object($className)) {
+            $className = get_class($className);
+        }
+        return substr($className, 0, strpos($className, '_'));
+    }
+    
+    /**
+     * Gets the type of model class (User or Entry for example)
+     * 
+     * @param string $className
+     * @return string
+     */
+    public static function getClassType($className)
+    {
+        if (is_object($className)) {
+            $className = get_class($className);
+        }
+        return substr($className, strrpos($className, '_') + 1);
+    }
+    
+    /**
      * Retreives cached object
      * 
      * @param string $objectName

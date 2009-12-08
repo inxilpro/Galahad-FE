@@ -22,6 +22,9 @@
 /** @see Galahad_Model */
 require_once 'Galahad/Model.php';
 
+/** @see Zend_Filter_Word_UnderscoreToCamelCase */
+require_once 'Zend/Filter/Word/UnderscoreToCamelCase.php';
+
 /**
  * Provides common model functionality
  * 
@@ -69,10 +72,9 @@ abstract class Galahad_Model_Entity extends Galahad_Model
      */
     public function reset(array $data)
     {
+    	$filter = new Zend_Filter_Word_UnderscoreToCamelCase();
         foreach ($data as $property => $value) {
-            $property = ucfirst(preg_replace_callback('/_([a-z])/', create_function(
-            	'$matches', 
-            	'return strtoupper($matches[1]);'), $property));
+            $property = $filter->filter($property);
             $method = "set{$property}";
             $this->$method($value); // TODO: Check that method exists?
         }
@@ -89,10 +91,9 @@ abstract class Galahad_Model_Entity extends Galahad_Model
      */
     public function getDataMapper($name = null)
     {
-        require_once 'Galahad.php'; // FIXME
-        $namespace = Galahad::getClassNamespace($this);
+        $namespace = self::getClassNamespace($this);
         if (null == $name) {
-            $name = Galahad::getClassType($this);
+            $name = self::getClassType($this);
         } else {
             $name = ucfirst($name);
         }
@@ -117,9 +118,9 @@ abstract class Galahad_Model_Entity extends Galahad_Model
      */
     public function getForm($name = null)
     {
-        $namespace = Galahad::getClassNamespace($this);
+        $namespace = self::getClassNamespace($this);
         if (null == $name) {
-            $name = Galahad::getClassType($this);
+            $name = self::getClassType($this);
         } else {
             $name = ucfirst($name);
         }
