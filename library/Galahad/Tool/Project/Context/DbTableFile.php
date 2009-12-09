@@ -135,42 +135,6 @@ class Galahad_Tool_Project_Context_DbTableFile extends Zend_Tool_Project_Context
                             'defaultValue' => $this->_tableName,
                         ),
                     ),
-                    /*
-                    'methods' => array(
-                		array(
-                			'name' => 'fetchAll',
-                			'body' => "\t\t// Fetch all rows",
-                		),
-                		array(
-                			'name' => 'fetchByPrimary',
-                			'parameters' => array(
-                				array(
-                					'name' => 'primaryKey',
-                				),
-                			),
-                			'body' => $fetchByPrimaryMethod,
-                		),
-                		array(
-                			'name' => 'save',
-                			'parameters' => array(
-                				array(
-                					'name' => 'data',
-                					'type' => 'array',
-                				),
-                			),
-                			'body' => $saveMethod,
-                		),
-                		array(
-                			'name' => 'deleteByPrimary',
-                			'parameters' => array(
-                				array(
-                					'name' => 'primaryKey',
-                				),
-                			),
-                			'body' => "\t\t// Delete row by primary key(s)",
-                		),
-                	),
-                	*/
                 )),
             ),
         ));

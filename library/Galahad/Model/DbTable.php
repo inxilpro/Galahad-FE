@@ -42,8 +42,10 @@ class Galahad_Model_DbTable extends Zend_Db_Table
 	 */
 	public function save(array $data)
 	{
+		$this->_setupPrimaryKey();
+		
         $keyCount = 0;
-        $primary = (array) $this->_primary;
+        $primary = $this->_primary;
         foreach ($primary as $column) {
         	if (isset($data[$column])) {
         		$keyCount++;
@@ -82,5 +84,26 @@ class Galahad_Model_DbTable extends Zend_Db_Table
         
         $data = $results->current()->toArray();
         return $data;
+	}
+	
+	/**
+	 * Deletes an entity from storage based on its primary key
+	 * 
+	 * @param mixed|array $primaryKey
+	 * @return boolean
+	 */
+	public function deleteByPrimary($primaryKey)
+	{
+		$this->_setupPrimaryKey();
+		
+		$keyColumns = $this->_primary;
+		$primaryKey = (array) $primaryKey;
+		
+		$where = array();
+		foreach ($keyColumns as $i => $column) {
+			$where[] = $this->getAdapter()->quoteInto("{$column} = ?", $primaryKey[$i - 1]);
+		}
+		
+		return (1 == $this->delete($where));
 	}
 }

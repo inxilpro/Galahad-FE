@@ -39,6 +39,12 @@ class Galahad_Model_Collection extends Galahad_Model implements Iterator, Counta
 	protected $_entities = array();
 	
 	/**
+	 * Classname for entities
+	 * @var string
+	 */
+	protected $_entityClass = null;
+	
+	/**
 	 * Current count of entities
 	 * @var integer
 	 */
@@ -79,7 +85,7 @@ class Galahad_Model_Collection extends Galahad_Model implements Iterator, Counta
 	 */
 	public function current() 
 	{
-	    return current($this->_entities);
+	    return $this->_ensureEntity(current($this->_entities));
 	}
 	
 	public function key()
@@ -113,11 +119,14 @@ class Galahad_Model_Collection extends Galahad_Model implements Iterator, Counta
 	
 	public function offsetGet($offset)
 	{
-	    return ($this->offsetExists($offset) ? $this->_entities[$offset] : null);
+	    return ($this->offsetExists($offset) ? $this->_ensureEntity($this->_entities[$offset]) : null);
 	}
 	
 	public function offsetSet($offset, $value)
 	{
+		// TODO: Should you even be able to update a collection?
+		$value = $this->_ensureEntity($value);
+		
 	    $this->_entities[$offset] = $value;
         $this->_count = count($this->_entities);
 	}
@@ -135,5 +144,44 @@ class Galahad_Model_Collection extends Galahad_Model implements Iterator, Counta
 	public function count()
 	{
 	    return count($this->_entities);
+	}
+	
+	/**
+	 * Manually set the Entity class to use
+	 * @param string $className
+	 */	
+	public function setEntityClass($className)
+	{
+		$this->_entityClass = $className;
+	}
+	
+	/**
+	 * Get the class name for generated Entities
+	 * @return string
+	 */
+    protected function _getEntityClass()
+	{
+		if (null == $this->_entityClass) {
+			$namespace = self::getClassNamespace($this);
+		    $modelName = self::getClassType($this);
+			$this->_entityClass =  "{$namespace}_Model_{$modelName}";	
+		}
+		
+		return $this->_entityClass;
+	}
+	
+	protected function _ensureEntity($entity)
+	{
+		$className = $this->_getEntityClass();
+		
+		if (is_array($entity)) {
+			$entity = new $className($entity);
+		}
+		
+		if (!$entity instanceof $className) {
+			throw new InvalidArgumentException(get_class($this) . " expects all entities to be of type '{$className}'");
+		}
+		
+		return $entity;
 	}
 }
