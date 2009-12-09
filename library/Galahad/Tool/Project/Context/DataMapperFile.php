@@ -136,7 +136,7 @@ return new {$moduleName}_Model_{$name}(\$data);
 end_method;
         
         $saveMethod = <<<end_method
-\$data = \$entity->getData();
+\$data = \$entity->toArray();
 \$dao = \$this->getDao();
 return \$dao->save(\$data);
 end_method;
