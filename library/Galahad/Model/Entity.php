@@ -90,7 +90,7 @@ abstract class Galahad_Model_Entity extends Galahad_Model
      * 
      * @return array
      */
-    public function getData()
+    public function toArray()
     {
     	$data = array();
     	$filter = new Zend_Filter_Word_UnderscoreToCamelCase();

@@ -118,6 +118,12 @@ class Galahad_Tool_Project_Context_DataMapperFile extends Zend_Tool_Project_Cont
         $name = $filter->filter($this->_dataMapperName);
         $className = $moduleName . '_Model_DataMapper_' . $name;
         
+        $fetchAllMethod = <<<end_method
+\$dao = \$this->getDao();
+\$data = \$dao->fetchAll();
+return new {$moduleName}_Model_Collection_{$name}(\$data->toArray());
+end_method;
+        
         $fetchByPrimaryMethod = <<<end_method
 \$dao = \$this->getDao();
 \$data = \$dao->fetchByPrimary(\$primaryKey);
@@ -134,6 +140,16 @@ end_method;
 \$dao = \$this->getDao();
 return \$dao->save(\$data);
 end_method;
+
+        $deleteMethod = <<<end_method
+\$primaryKey = \$entity->getId(); // TODO: Assumes propery 'id' is primary key
+return \$this->deleteByPrimary(\$primaryKey);
+end_method;
+
+        $deleteByPrimaryMethod = <<<end_method
+\$dao = \$this->getDao();
+return \$dao->deleteByPrimary(\$primaryKey);
+end_method;
         
         $codeGenFile = new Zend_CodeGenerator_Php_File(array(
             'fileName' => $this->getPath(),
@@ -145,7 +161,7 @@ end_method;
                 	'methods' => array(
                 		array(
                 			'name' => 'fetchAll',
-                			'body' => "\t\t// Fetch all entities",
+                			'body' => $fetchAllMethod,
                 		),
                 		array(
                 			'name' => 'fetchByPrimary',
@@ -174,7 +190,7 @@ end_method;
                 					'type' => 'Galahad_Model_Entity',
                 				),
                 			),
-                			'body' => "\t\t// Delete entity",
+                			'body' => $deleteMethod,
                 		),
                 		array(
                 			'name' => 'deleteByPrimary',
@@ -183,7 +199,7 @@ end_method;
                 					'name' => 'primaryKey',
                 				),
                 			),
-                			'body' => "\t\t// Delete entity by primary key",
+                			'body' => $deleteByPrimaryMethod,
                 		),
                 	),
                 )),

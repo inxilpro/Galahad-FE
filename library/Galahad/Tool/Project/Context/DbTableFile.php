@@ -127,7 +127,7 @@ class Galahad_Tool_Project_Context_DbTableFile extends Zend_Tool_Project_Context
             'classes' => array(
                 new Zend_CodeGenerator_Php_Class(array(
                     'name' => $className,
-                    'extendedClass' => 'Zend_Db_Table_Abstract',
+                    'extendedClass' => 'Galahad_Model_DbTable',
                     'properties' => array(
                         array(
                             'name' => '_name',
