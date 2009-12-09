@@ -45,7 +45,7 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
      * @todo Remember to namespace with Default_ if $module is NULL
      * @param string $name
      */
-    public function create($name, $dataMapperIncluded = true, $formIncluded = true, $tableIncluded = true, $module = null)
+    public function create($name, $collectionIncluded = true, $dataMapperIncluded = true, $formIncluded = true, $tableIncluded = true, $module = null)
     {
         $this->_loadProfile(self::NO_PROFILE_THROW_EXCEPTION);
 
@@ -70,6 +70,9 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
             }
         	if ($dataMapperIncluded) {
                 $dataMapperResource = Galahad_Tool_Project_Provider_DataMapper::createResource($this->_loadedProfile, $name, $module);
+            }
+        	if ($collectionIncluded) {
+                $collectionResource = Galahad_Tool_Project_Provider_Collection::createResource($this->_loadedProfile, $name, $module);
             }
             
             // TODO Add Properties via Zend_Tool_Project_Provider_ModelProperty
@@ -102,6 +105,11 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
             $this->_registry->getResponse()->appendContent('Creating data mapper for model ' . $name
                 . ' at ' . $dataMapperResource->getContext()->getPath());
             $dataMapperResource->create();
+        }
+    	if (isset($collectionResource)) {
+            $this->_registry->getResponse()->appendContent('Creating collection for model ' . $name
+                . ' at ' . $collectionResource->getContext()->getPath());
+            $collectionResource->create();
         }
         
         $this->_storeProfile();
