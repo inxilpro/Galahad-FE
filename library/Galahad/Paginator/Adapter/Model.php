@@ -45,14 +45,23 @@ class Galahad_Paginator_Adapter_Model implements Zend_Paginator_Adapter_Interfac
 	private $_constraint;
 	
 	/**
+	 * The number of models counted
+	 * 
+	 * @var integer
+	 */
+	private $_count = null;
+	
+	/**
 	 * Constructor
 	 * 
+	 * @todo  Might want to reset any limit set on constraint, or throw an exception...
 	 * @param Galahad_Model_DataMapper $mapper
 	 * @param Galahad_Model_ConstraintInterface $constraint
 	 */
 	public function __construct(Galahad_Model_DataMapper $mapper, Galahad_Model_ConstraintInterface $constraint = null)
 	{
-		
+		$this->_mapper = $mapper;
+		$this->_constraint = $constraint;
 	}
 	
 	/**
@@ -62,7 +71,11 @@ class Galahad_Paginator_Adapter_Model implements Zend_Paginator_Adapter_Interfac
      */
 	public function count()
 	{
+		if (null == $this->_count) {
+			$this->_count = $this->_mapper->count($this->_constraint);
+		}
 		
+		return $this->_count;
 	}
     
     /**
@@ -74,6 +87,7 @@ class Galahad_Paginator_Adapter_Model implements Zend_Paginator_Adapter_Interfac
      */
     public function getItems($offset, $itemCountPerPage)
     {
-    	
+    	$this->_constraint->limitPage($offset, $itemCountPerPage);
+    	return $this->_mapper->fetchAll($this->_constraint);
     }
 }

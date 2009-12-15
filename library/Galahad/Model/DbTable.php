@@ -106,4 +106,19 @@ class Galahad_Model_DbTable extends Zend_Db_Table
 		
 		return (1 == $this->delete($where));
 	}
+	
+	/**
+	 * Gets a count of models matching constraint
+	 * 
+	 * @param Galahad_Model_DbTable_Constraint $constraint
+	 */
+	public function count(Galahad_Model_DbTable_Constraint $constraint = null)
+	{
+		if (null == $constraint) {
+			$constraint = $this->select();
+		}
+		$constraint->from($this, array('c' => 'COUNT(*)'));
+		$r = $this->fetchAll($constraint)->current()->toArray();
+		return $r['c'];
+	}
 }

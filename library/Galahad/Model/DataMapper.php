@@ -73,11 +73,16 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	
 	/**
 	 * Fetch all Entities as a Collection
+	 * 
+	 * @todo Maybe make a non-abstract version of this
+	 * @param Galahad_Model_ConstraintInterface $constraint
 	 */
 	abstract public function fetchAll(Galahad_Model_ConstraintInterface $constraint = null);
 	
 	/**
 	 * Fetch a single Entity by its Primary Key
+	 * 
+	 * @todo Maybe make a non-abstract version of this
 	 * @param mixed $primaryKey Most likely a string, integer, or array
 	 */
 	abstract public function fetchByPrimary($primaryKey);
@@ -100,6 +105,17 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	 * @param mixed $primaryKey Most likely a string, integer, or array
 	 */
 	abstract public function deleteByPrimary($primaryKey);
+	
+	/**
+	 * Get a count of Entities in storage
+	 * 
+	 * @param Galahad_Model_ConstraintInterface $constraint
+	 * @return integer
+	 */
+	public function count(Galahad_Model_ConstraintInterface $constraint = null)
+	{
+		return $this->getDao()->count($constraint);
+	}
 	
 	/**
 	 * Get a new Constraint object
