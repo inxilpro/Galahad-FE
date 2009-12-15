@@ -25,6 +25,8 @@ require_once 'Galahad/Model.php';
 /**
  * Provides base functionality for data mappers
  * 
+ * @todo Should the classes have the option to be set statically?
+ * 
  * @category   Galahad
  * @package    Galahad_Model
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
@@ -57,9 +59,22 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	protected $_collectionClass;
 	
 	/**
+	 * Class name for generated collections
+	 * @var string
+	 */
+	protected $_constraintClass = 'Galahad_Model_DbTable_Constraint';
+	
+	/**
+	 * Paginator
+	 * 
+	 * @var Zend_Paginator_Adapter_Interface
+	 */
+	protected $_paginator = null;
+	
+	/**
 	 * Fetch all Entities as a Collection
 	 */
-	abstract public function fetchAll();
+	abstract public function fetchAll(Galahad_Model_ConstraintInterface $constraint = null);
 	
 	/**
 	 * Fetch a single Entity by its Primary Key
@@ -85,6 +100,17 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	 * @param mixed $primaryKey Most likely a string, integer, or array
 	 */
 	abstract public function deleteByPrimary($primaryKey);
+	
+	/**
+	 * Get a new Constraint object
+	 * @return Galahad_Model_ConstraintInterface
+	 * @todo Should this be 'getConstraint' or is the fluid interface good here?
+	 */
+	public function constraint()
+	{
+		$className = $this->_getConstraintClass();
+		return new $className($this->getDao()); // TODO: How to handle this dependency?
+	}
 	
 	/**
 	 * Manually set the DAO's class name
@@ -166,16 +192,61 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 		$this->_collectionClass = $className;
 	}
 	
-		
+	/**
+	 * Get the collection class
+	 * @return string
+	 */	
 	protected function _getCollectionClass()
 	{
 		if (null == $this->_collectionClass) {
 			$namespace = self::getClassNamespace($this);
 		    $modelName = self::getClassType($this);
-			$this->_collectionClass =  "{$namespace}_{$modelName}Collection"; // TODO: Naming?	
+			$this->_collectionClass =  "{$namespace}_Model_Collection_{$modelName}"; // TODO: Naming?	
 		}
 		
 		return $this->_collectionClass;
+	}
+	
+	/**
+	 * Manually set the Constraint class to use
+	 * @param string $className
+	 */
+	public function setConstraintClass($className)
+	{
+		$this->_constraintClass = $className;
+	}
+	
+	/**
+	 * Get the constraint class
+	 * @return string
+	 */
+	protected function _getConstraintClass()
+	{
+		return $this->_constraintClass;
+	}
+	
+	/**
+	 * Manually set the Paginator
+	 * @param Zend_Paginator $paginator
+	 * @todo Reorganize this
+	 */
+	public function setPaginator(Zend_Paginator_Adapter_Interface $paginator)
+	{
+		$this->_paginator = $paginator;
+	}
+	
+	/**
+	 * Get the paginator
+	 * @return Zend_Paginator
+	 * @todo Not sure about this
+	 */
+	public function getPaginator()
+	{
+		if (null == $this->_paginator) {
+			$this->_paginator = new Zend_Paginator(new Zend_Paginator_Adapter_DbTableSelect($this->getDao()->select()));
+		}
+		
+		return $this->_paginator;
 	}
 }
 
