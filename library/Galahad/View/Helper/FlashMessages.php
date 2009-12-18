@@ -20,6 +20,11 @@
  */
 
 /**
+ * @see Zend_View_Helper_Abstract
+ */
+require_once 'Zend/View/Helper/Abstract.php';
+
+/**
  * Gets any messages in the FlashMessenger
  * 
  * @category   Galahad
