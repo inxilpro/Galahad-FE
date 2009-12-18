@@ -129,6 +129,18 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	}
 	
 	/**
+	 * Get a new Paginator object
+	 * 
+	 * @return Galahad_Paginator_Adapter_Model
+	 */
+	public function paginator(Galahad_Model_ConstraintInterface $constraint = null, $itemCountPerPage = 10)
+	{
+		$paginator = new Zend_Paginator(new Galahad_Paginator_Adapter_Model($this, $constraint));
+		$paginator->setItemCountPerPage($itemCountPerPage);
+		return $paginator;
+	}
+	
+	/**
 	 * Manually set the DAO's class name
 	 * @param string $className
 	 */
@@ -239,30 +251,6 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	protected function _getConstraintClass()
 	{
 		return $this->_constraintClass;
-	}
-	
-	/**
-	 * Manually set the Paginator
-	 * @param Zend_Paginator $paginator
-	 * @todo Reorganize this
-	 */
-	public function setPaginator(Zend_Paginator_Adapter_Interface $paginator)
-	{
-		$this->_paginator = $paginator;
-	}
-	
-	/**
-	 * Get the paginator
-	 * @return Zend_Paginator
-	 * @todo Not sure about this
-	 */
-	public function getPaginator()
-	{
-		if (null == $this->_paginator) {
-			$this->_paginator = new Zend_Paginator(new Zend_Paginator_Adapter_DbTableSelect($this->getDao()->select()));
-		}
-		
-		return $this->_paginator;
 	}
 }
 

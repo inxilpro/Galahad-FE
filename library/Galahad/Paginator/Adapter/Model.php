@@ -61,6 +61,10 @@ class Galahad_Paginator_Adapter_Model implements Zend_Paginator_Adapter_Interfac
 	public function __construct(Galahad_Model_DataMapper $mapper, Galahad_Model_ConstraintInterface $constraint = null)
 	{
 		$this->_mapper = $mapper;
+		
+		if (null == $constraint) {
+			$constraint = $mapper->constraint();
+		}
 		$this->_constraint = $constraint;
 	}
 	
@@ -87,7 +91,9 @@ class Galahad_Paginator_Adapter_Model implements Zend_Paginator_Adapter_Interfac
      */
     public function getItems($offset, $itemCountPerPage)
     {
-    	$this->_constraint->limitPage($offset, $itemCountPerPage);
+    	// echo "<p>Offset: '{$offset}' - Item Count Per Page: '{$itemCountPerPage}'</p>";
+    	// public function limit($count = null, $offset = null);
+    	$this->_constraint->limit($itemCountPerPage, $offset);
     	return $this->_mapper->fetchAll($this->_constraint);
     }
 }

@@ -76,7 +76,12 @@ abstract class Galahad_Model_Entity extends Galahad_Model
         foreach ($data as $property => $value) {
             $property = $filter->filter($property);
             $method = "set{$property}";
-            $this->$method($value); // TODO: Check that method exists?
+            
+            if (!method_exists($this, $method)) {
+            	throw new BadMethodCallException("No property '$property' exists");
+            }
+            
+            $this->$method($value);
         }
         
         return $this;

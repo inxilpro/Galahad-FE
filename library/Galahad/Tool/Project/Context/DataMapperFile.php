@@ -120,7 +120,7 @@ class Galahad_Tool_Project_Context_DataMapperFile extends Zend_Tool_Project_Cont
         
         $fetchAllMethod = <<<end_method
 \$dao = \$this->getDao();
-\$data = \$dao->fetchAll();
+\$data = \$dao->fetchAll(\$constraint);
 return new {$moduleName}_Model_Collection_{$name}(\$data->toArray());
 end_method;
         
@@ -162,6 +162,13 @@ end_method;
                 		array(
                 			'name' => 'fetchAll',
                 			'body' => $fetchAllMethod,
+                			'parameters' => array(
+                				array(
+                					'name' => 'constraint',
+                					'type' => 'Galahad_Model_ConstraintInterface',
+                					'default' => null,
+                				)
+                			),
                 		),
                 		array(
                 			'name' => 'fetchByPrimary',

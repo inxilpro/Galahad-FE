@@ -117,6 +117,8 @@ class Galahad_Model_DbTable extends Zend_Db_Table
 		if (null == $constraint) {
 			$constraint = $this->select();
 		}
+		
+		$constraint = clone $constraint;
 		$constraint->from($this, array('c' => 'COUNT(*)'));
 		$r = $this->fetchAll($constraint)->current()->toArray();
 		return $r['c'];
