@@ -166,7 +166,7 @@ end_method;
                 				array(
                 					'name' => 'constraint',
                 					'type' => 'Galahad_Model_ConstraintInterface',
-                					'default' => null,
+                					'defaultValue' => null,
                 				)
                 			),
                 		),

@@ -123,11 +123,11 @@ class Galahad_Controller_Plugin_Acl extends Zend_Controller_Plugin_Abstract
 		$this->_ensureResource($resourceName);
 		
 		if (!$this->_acl->isAllowed(self::$_role, $resourceName, 'view')) {
-			$this->_redirect();
+			$this->redirect();
 		}
 	}
 	
-	private function _redirect()
+	public function redirect()
 	{
 		$redirector = Zend_Controller_Action_HelperBroker::getStaticHelper('redirector');
 
