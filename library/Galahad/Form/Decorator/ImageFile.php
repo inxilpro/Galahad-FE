@@ -46,11 +46,10 @@ class Galahad_Form_Decorator_ImageFile extends Zend_Form_Decorator_File
      */
     public function render($content)
     {
-    	$element = $this->getElement();
-    	$value = $element->getValue();
-    	
-    	$element->setValue(null);
         $content = parent::render($content);
+        
+        $element = $this->getElement();
+    	$value = $element->getValue();
         
         if (null == $value) {
         	return $content;
@@ -60,11 +59,23 @@ class Galahad_Form_Decorator_ImageFile extends Zend_Form_Decorator_File
         $separator = $this->getSeparator();
         $placement = $this->getPlacement();
         
+        // TODO: Maybe change these to instanceof tests
         if (method_exists($element, 'getBaseUrl')) {
         	$value = $element->getBaseUrl() . $value;
         }
         
-        $markup = '<img src="' . $value . '" alt="' . htmlentities($element->getLabel()) . '"'
+        $width = '';
+    	if (method_exists($element, 'getWidth')) {
+        	$width = 'width="' . $element->getWidth() . '" ';
+        }
+        
+        $height = '';
+		if (method_exists($element, 'getHeight')) {
+        	$height = 'height="' . $element->getHeight() . '" ';
+        }
+        
+        $markup = '<img ' . $width . $height . 'src="' . $value . '" alt="' . 
+        		htmlentities(rtrim($element->getLabel(), ':')) . '"'
         		. ($view->doctype()->isXhtml() ? ' /><br />' : '><br>'); // FIXME
         
         switch ($placement) {

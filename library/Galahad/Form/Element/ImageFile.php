@@ -31,20 +31,18 @@ require_once 'Zend/Form/Element/File.php';
  * @license    GPL <http://www.gnu.org/licenses/>
  */
 class Galahad_Form_Element_ImageFile extends Zend_Form_Element_File
-{	
-	/**
-     * @var string Default view helper
-     */
-    public $helper = 'formImageFile';
-    
+{    
     private $_baseUrl = '';
+	private $_width = null;
+	private $_height = null;
     
     public function init()
     {
     	$this->addPrefixPath('Galahad_Form_Decorator', 'Galahad/Form/Decorator', self::DECORATOR);
+    	
     	$this->addValidators(array(
     		new Zend_Validate_File_Count(1),
-        	new Zend_Validate_File_IsImage(),
+        	// new Zend_Validate_File_IsImage(), // FIXME
     	));
     }
     
@@ -96,8 +94,28 @@ class Galahad_Form_Element_ImageFile extends Zend_Form_Element_File
      * Get the current base URL
      * @param string $baseUrl
      */
-    public function getBaseUrl($baseUrl)
+    public function getBaseUrl()
     {
     	return $this->_baseUrl;
+    }
+    
+    public function setWidth($width)
+    {
+    	$this->_width = $width;
+    }
+    
+    public function getWidth()
+    {
+    	return $this->_width;
+    }
+    
+    public function setHeight($height)
+    {
+    	$this->_height = $height;
+    }
+    
+    public function getHeight()
+    {
+    	return $this->_height;
     }
 }

@@ -138,21 +138,6 @@ class Galahad_Tool_Project_Context_ModelFile extends Zend_Tool_Project_Context_F
     }
     
     /**
-     * addProperty()
-     *
-     * @param string $propertyName
-     * @param array $propertyOptions
-     */
-    public function addProperty($propertyName, $propertyOptions)
-    {
-        // FIXME
-        echo "\nWould create a new property";
-        // $class = $this->getCodeGenerator();
-        // $class->setMethod(array('name' => $propertyName . 'Action', 'body' => '        // action body here'));
-        // file_put_contents($this->getPath(), $codeGenFile->generate());
-    }
-    
-    /**
      * getCodeGenerator()
      *
      * @return Zend_CodeGenerator_Php_Class

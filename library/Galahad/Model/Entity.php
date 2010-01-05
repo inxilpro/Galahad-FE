@@ -101,6 +101,7 @@ abstract class Galahad_Model_Entity extends Galahad_Model
     	$filter = new Zend_Filter_Word_UnderscoreToCamelCase();
     	foreach ($this->_data as $key => $value) {
     		$method = 'get' . $filter->filter($key);
+    		// TODO: Call toArray on returned object if instanceof Galahad_Model_Entity
     		$data[$key] = $this->$method(); 
     	}
     	
@@ -196,6 +197,9 @@ abstract class Galahad_Model_Entity extends Galahad_Model
      */
     protected function _getPropertyData($property, $default = null)
     {
+    	// TODO: If property = xxxxx_id try to load model "xxxxx" with primary key of property value
+    	// That is, if the value is not a model object (or perhaps if it's an integer)
+    	
         if (!isset($this->_data[$property])) {
             return $default;
         }
