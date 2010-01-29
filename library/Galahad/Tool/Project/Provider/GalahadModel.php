@@ -37,7 +37,7 @@ require_once 'Galahad/Tool/Project/Provider/Abstract.php';
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_Abstract
+class Galahad_Tool_Project_Provider_GalahadModel extends Galahad_Tool_Project_Provider_Abstract
 {
     /**
      * create()
@@ -63,16 +63,16 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
             	// TODO: Do this in db table resource 
                 $filter = new Zend_Filter_Word_DashToUnderscore();
                 $tableName = $filter->filter($name);
-                $dbTableResource = Galahad_Tool_Project_Provider_DbTable::createResource($this->_loadedProfile, $tableName, $module);
+                $dbTableResource = Galahad_Tool_Project_Provider_GalahadDbTable::createResource($this->_loadedProfile, $tableName, $module);
             }
         	if ($formIncluded) {
-                $formResource = Galahad_Tool_Project_Provider_Form::createResource($this->_loadedProfile, $name, $module);
+                $formResource = Zend_Tool_Project_Provider_Form::createResource($this->_loadedProfile, $name, $module);
             }
         	if ($dataMapperIncluded) {
-                $dataMapperResource = Galahad_Tool_Project_Provider_DataMapper::createResource($this->_loadedProfile, $name, $module);
+                $dataMapperResource = Galahad_Tool_Project_Provider_GalahadDataMapper::createResource($this->_loadedProfile, $name, $module);
             }
         	if ($collectionIncluded) {
-                $collectionResource = Galahad_Tool_Project_Provider_Collection::createResource($this->_loadedProfile, $name, $module);
+                $collectionResource = Galahad_Tool_Project_Provider_GalahadCollection::createResource($this->_loadedProfile, $name, $module);
             }
             
             // TODO Add Properties via Zend_Tool_Project_Provider_ModelProperty
@@ -126,14 +126,14 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
     public static function hasResource(Zend_Tool_Project_Profile $profile, $modelName, $moduleName = null)
     {
         if (!is_string($modelName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_Model::createResource() expects \"modelName\" is the name of a model resource to create.');
+            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_GalahadModel::createResource() expects \"modelName\" is the name of a model resource to create.');
         }
 
         $modelsDirectory = self::_getModelsDirectoryResource($profile, $moduleName);
         if (false == $modelsDirectory) {
             return false;
         }
-        return (($modelsDirectory->search(array('modelFile' => array('modelName' => $modelName)))) instanceof Zend_Tool_Project_Profile_Resource);
+        return (($modelsDirectory->search(array('galahadModelFile' => array('modelName' => $modelName)))) instanceof Zend_Tool_Project_Profile_Resource);
     }
     
 	/**
@@ -162,7 +162,7 @@ class Galahad_Tool_Project_Provider_Model extends Galahad_Tool_Project_Provider_
             throw new Zend_Tool_Project_Provider_Exception($exceptionMessage);
         }
 
-        $newModel = $modelsDirectory->createResource('modelFile', array(
+        $newModel = $modelsDirectory->createResource('galahadModelFile', array(
         	'modelName' => $modelName, 
         	'moduleName' => $moduleName
         ));

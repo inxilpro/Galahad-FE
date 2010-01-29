@@ -23,7 +23,23 @@
 require_once 'Zend/Controller/Plugin/Abstract.php';
 
 /**
- * Provides a basic wrapper around an array of Entities
+ * ACL Plugin
+ * 
+ * Handles enforcing ACL restrictions on your standard MVC application.  All
+ * MVC resources in the ACL should be in the form of:
+ * 
+ * mvc
+ *  - mvc:module (child of "mvc")
+ *    - mvc:module.controller (child of "mvc:module")
+ *      - mvc:module.controller.action (child of "mvc.module.controller")
+ *      
+ * This allows for various levels of access controls on your MVC application.
+ * For example, you can allow all access to "mvc:admin" to your staff, but disallow
+ * access to "mvc:admin.users.delete" to everyone but administrators.
+ * 
+ * If a resource in your ACL does not exist the plugin will create it and all
+ * non-existant parent resources.  If the resource DOES exists, the plugin will
+ * not attempt to create parent resources.
  * 
  * @category   Galahad
  * @package    Galahad_Controller

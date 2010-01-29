@@ -32,7 +32,7 @@ require_once 'Galahad/Tool/Project/Provider/Abstract.php';
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Provider_FormElement extends Galahad_Tool_Project_Provider_Abstract
+class Galahad_Tool_Project_Provider_GalahadFormElement extends Galahad_Tool_Project_Provider_Abstract
 {
     /**
      * createResource()
@@ -46,15 +46,15 @@ class Galahad_Tool_Project_Provider_FormElement extends Galahad_Tool_Project_Pro
     public static function createResource(Zend_Tool_Project_Profile $profile, $elementName, $formName, $type = 'text', $required = false, $moduleName = null)
     {
         if (!is_string($elementName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_FormElement::createResource() expects \"elementName\" is the name of a element resource to create.');
+            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_GalahadFormElement::createResource() expects \"elementName\" is the name of a element resource to create.');
         }
 
         if (!is_string($formName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_FormElement::createResource() expects \"formName\" is the name of a form resource to create.');
+            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_GalahadFormElement::createResource() expects \"formName\" is the name of a form resource to create.');
         }
 
         $formFile = self::_getFormFileResource($profile, $formName, $moduleName);   
-        $elementMethod = $formFile->createResource('FormElement', array('elementName' => $elementName, 'elementType' => $type, 'required' => $required));
+        $elementMethod = $formFile->createResource('galahadFormElement', array('elementName' => $elementName, 'elementType' => $type, 'required' => $required));
         return $elementMethod;
     }
 
@@ -70,15 +70,15 @@ class Galahad_Tool_Project_Provider_FormElement extends Galahad_Tool_Project_Pro
     public static function hasResource(Zend_Tool_Project_Profile $profile, $elementName, $formName, $moduleName = null)
     {
         if (!is_string($elementName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_FormElement::hasResource() expects \"elementName\" is the name of a element resource to create.');
+            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_GalahadFormElement::hasResource() expects \"elementName\" is the name of a element resource to create.');
         }
         
         if (!is_string($formName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_FormElement::hasResource() expects \"formName\" is the name of a form resource to create.');
+            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_GalahadFormElement::hasResource() expects \"formName\" is the name of a form resource to create.');
         }
         
         $formFile = self::_getFormFileResource($profile, $formName, $moduleName);
-        return (($formFile->search(array('formElement' => array('elementName' => $elementName)))) instanceof Zend_Tool_Project_Profile_Resource);
+        return (($formFile->search(array('galahadFormElement' => array('elementName' => $elementName)))) instanceof Zend_Tool_Project_Profile_Resource);
     }
 
     /**

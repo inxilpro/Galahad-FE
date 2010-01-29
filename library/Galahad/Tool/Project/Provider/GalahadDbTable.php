@@ -25,14 +25,14 @@
 require_once 'Galahad/Tool/Project/Provider/Abstract.php';
 
 /**
- * Generates a collection object
+ * Provides basic model scaffolding
  * 
  * @category   Galahad
  * @package    Galahad_Tool
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Provider_Collection extends Galahad_Tool_Project_Provider_Abstract
+class Galahad_Tool_Project_Provider_GalahadDbTable extends Galahad_Tool_Project_Provider_Abstract
 {
     /**
      * create()
@@ -40,7 +40,7 @@ class Galahad_Tool_Project_Provider_Collection extends Galahad_Tool_Project_Prov
      * @todo Remember to namespace with Default_ if $module is NULL
      * @param string $name
      */
-    public function create($name, $module = null)
+    public function create($tableName, $module = null)
     {
         $this->_loadProfile(self::NO_PROFILE_THROW_EXCEPTION);
 
@@ -48,20 +48,20 @@ class Galahad_Tool_Project_Provider_Collection extends Galahad_Tool_Project_Prov
         // require_once 'Zend/Tool/Project/Provider/Test.php';
         // $testingEnabled = Zend_Tool_Project_Provider_Test::isTestingEnabled($this->_loadedProfile);
 
-        if (self::hasResource($this->_loadedProfile, $name, $module)) {
-            throw new Zend_Tool_Project_Provider_Exception('This project already has a collection named ' . $name);
+        if (self::hasResource($this->_loadedProfile, $tableName, $module)) {
+            throw new Zend_Tool_Project_Provider_Exception('This project already has a db table named ' . $tableName);
         }
 
         try {
-            $collectionResource = self::createResource($this->_loadedProfile, $name, $module);
+            $dbTableResource = self::createResource($this->_loadedProfile, $tableName, $module);
         } catch (Exception $e) {
             $response = $this->_registry->getResponse();
             $response->setException($e);
             return;
         }
 
-        $this->_registry->getResponse()->appendContent('Creating a collection at ' . $collectionResource->getContext()->getPath());
-        $collectionResource->create();
+        $this->_registry->getResponse()->appendContent('Creating a dbTable at ' . $dbTableResource->getContext()->getPath());
+        $dbTableResource->create();
         
         $this->_storeProfile();
     }
@@ -70,61 +70,61 @@ class Galahad_Tool_Project_Provider_Collection extends Galahad_Tool_Project_Prov
      * hasResource()
      *
      * @param Zend_Tool_Project_Profile $profile
-     * @param string $collectionName
+     * @param string $dbTableName
      * @param string $moduleName
      * @return Zend_Tool_Project_Profile_Resource
      */
-    public static function hasResource(Zend_Tool_Project_Profile $profile, $collectionName, $moduleName = null)
+    public static function hasResource(Zend_Tool_Project_Profile $profile, $tableName, $moduleName = null)
     {
-        if (!is_string($collectionName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_Collection::hasResource() expects \"collectionName\" is the name of the collection.');
+        if (!is_string($tableName)) {
+            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_GalahadDbTable::createResource() expects \"tableName\" is the name of the db table.');
         }
 
-        $collectionsDirectory = self::_getCollectionsDirectoryResource($profile, $moduleName);
-        if (false == $collectionsDirectory) {
+        $dbTablesDirectory = self::_getDbTablesDirectoryResource($profile, $moduleName);
+        if (false == $dbTablesDirectory) {
             return false;
         }
 
-        return (($collectionsDirectory->search(array('collectionFile' => array('collectionName' => $collectionName)))) instanceof Zend_Tool_Project_Profile_Resource);
+        return (($dbTablesDirectory->search(array('galahadDbTableFile' => array('tableName' => $tableName)))) instanceof Zend_Tool_Project_Profile_Resource);
     }
     
 	/**
-     * createResource will create the collectionFile resource at the appropriate location in the
+     * createResource will create the galahadDbTableFile resource at the appropriate location in the
      * profile.  NOTE: it is your job to execute the create() method on the resource, as well as
      * store the profile when done.
      *
      * @param Zend_Tool_Project_Profile $profile
-     * @param string $collectionName
+     * @param string $dbTableName
      * @param string $moduleName
      * @return Zend_Tool_Project_Profile_Resource
      */
-    public static function createResource(Zend_Tool_Project_Profile $profile, $collectionName, $moduleName = null)
+    public static function createResource(Zend_Tool_Project_Profile $profile, $tableName, $moduleName = null)
     {
-        if (!is_string($collectionName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Zend_Tool_Project_Provider_Collection::createResource() expects \"collectionName\" is the name of the collection.');
+        if (!is_string($tableName)) {
+            throw new Zend_Tool_Project_Provider_Exception('Zend_Tool_Project_Provider_GalahadDbTable::createResource() expects \"tableName\" is the name of the table.');
         }
 
-        if (!($collectionsDirectory = self::_getCollectionsDirectoryResource($profile, $moduleName))) {
+        if (!($dbTablesDirectory = self::_getDbTablesDirectoryResource($profile, $moduleName))) {
             if ($moduleName) {
-                $exceptionMessage = 'A collection directory for module "' . $moduleName . '" was not found.';
+                $exceptionMessage = 'A dbTable directory for module "' . $moduleName . '" was not found.';
             } else {
-                $exceptionMessage = 'A collection directory was not found.';
+                $exceptionMessage = 'A dbTable directory was not found.';
             }
             throw new Zend_Tool_Project_Provider_Exception($exceptionMessage);
         }
 
-        $newCollection = $collectionsDirectory->createResource('collectionFile', array('collectionName' => $collectionName));
-        return $newCollection;
+        $newDbTable = $dbTablesDirectory->createResource('galahadDbTableFile', array('tableName' => $tableName));
+        return $newDbTable;
     }
     
 	/**
-     * _getCollectionsDirectoryResource()
+     * _getDbTablesDirectoryResource()
      *
      * @param Zend_Tool_Project_Profile $profile
      * @param string $moduleName
      * @return Zend_Tool_Project_Profile_Resource
      */
-    protected static function _getCollectionsDirectoryResource(Zend_Tool_Project_Profile $profile, $moduleName = null)
+    protected static function _getDbTablesDirectoryResource(Zend_Tool_Project_Profile $profile, $moduleName = null)
     {
         $profileSearchParams = array();
 
@@ -132,20 +132,20 @@ class Galahad_Tool_Project_Provider_Collection extends Galahad_Tool_Project_Prov
             $profileSearchParams = array('modulesDirectory', 'moduleDirectory' => array('moduleName' => $moduleName));
         }
 
-        $profileSearchParams[] = 'collectionDirectory';
-        $collectionDirectory = $profile->search($profileSearchParams);
+        $profileSearchParams[] = 'dbTableDirectory';
+        $dbTablesDirectory = $profile->search($profileSearchParams);
         
-        if (!$collectionDirectory 
-            || (null == $moduleName && $collectionDirectory->getParentResource()->getParentResource()->getContext() instanceof Zend_Tool_Project_Context_Zf_ModuleDirectory)) {
+        if (!$dbTablesDirectory 
+            || (null == $moduleName && $dbTablesDirectory->getParentResource()->getParentResource()->getContext() instanceof Zend_Tool_Project_Context_Zf_ModuleDirectory)) {
             $modelsDirectory = self::_getModelsDirectoryResource($profile, $moduleName);
-            $collectionDirectory = $modelsDirectory->createResource('collectionDirectory', array());
-            $collectionDirectory->create();
+            $dbTablesDirectory = $modelsDirectory->createResource('dbTableDirectory', array());
+            $dbTablesDirectory->create();
             
             $projectProfileFile = $profile->search('ProjectProfileFile');
             $projectProfileFile->getContext()->save();
         }
         
-        return $collectionDirectory;
+        return $dbTablesDirectory;
     }
     
 	/**

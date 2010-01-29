@@ -32,7 +32,7 @@ require_once 'Galahad/Tool/Project/Provider/Abstract.php';
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Provider_DataMapper extends Galahad_Tool_Project_Provider_Abstract
+class Galahad_Tool_Project_Provider_GalahadDataMapper extends Galahad_Tool_Project_Provider_Abstract
 {
     /**
      * create()
@@ -77,7 +77,7 @@ class Galahad_Tool_Project_Provider_DataMapper extends Galahad_Tool_Project_Prov
     public static function hasResource(Zend_Tool_Project_Profile $profile, $dataMapperName, $moduleName = null)
     {
         if (!is_string($dataMapperName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_DataMapper::createResource() expects \"dataMapperName\" is the name of the data mapper.');
+            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_GalahadDataMapper::createResource() expects \"dataMapperName\" is the name of the data mapper.');
         }
 
         $dataMappersDirectory = self::_getDataMappersDirectoryResource($profile, $moduleName);
@@ -85,7 +85,7 @@ class Galahad_Tool_Project_Provider_DataMapper extends Galahad_Tool_Project_Prov
             return false;
         }
 
-        return (($dataMappersDirectory->search(array('dataMapperFile' => array('dataMapperName' => $dataMapperName)))) instanceof Zend_Tool_Project_Profile_Resource);
+        return (($dataMappersDirectory->search(array('galahadDataMapperFile' => array('dataMapperName' => $dataMapperName)))) instanceof Zend_Tool_Project_Profile_Resource);
     }
     
 	/**
@@ -101,7 +101,7 @@ class Galahad_Tool_Project_Provider_DataMapper extends Galahad_Tool_Project_Prov
     public static function createResource(Zend_Tool_Project_Profile $profile, $dataMapperName, $moduleName = null)
     {
         if (!is_string($dataMapperName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Zend_Tool_Project_Provider_DataMapper::createResource() expects \"dataMapperName\" is the name of the dataMapper.');
+            throw new Zend_Tool_Project_Provider_Exception('Zend_Tool_Project_Provider_GalahadDataMapper::createResource() expects \"dataMapperName\" is the name of the dataMapper.');
         }
 
         if (!($dataMappersDirectory = self::_getDataMappersDirectoryResource($profile, $moduleName))) {
@@ -113,7 +113,7 @@ class Galahad_Tool_Project_Provider_DataMapper extends Galahad_Tool_Project_Prov
             throw new Zend_Tool_Project_Provider_Exception($exceptionMessage);
         }
 
-        $newDataMapper = $dataMappersDirectory->createResource('dataMapperFile', array('dataMapperName' => $dataMapperName));
+        $newDataMapper = $dataMappersDirectory->createResource('galahadDataMapperFile', array('dataMapperName' => $dataMapperName));
         return $newDataMapper;
     }
     

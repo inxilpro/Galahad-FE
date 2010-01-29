@@ -23,7 +23,8 @@
 require_once 'Zend/Form/Decorator/File.php';
 
 /**
- * Provides a basic wrapper around an array of Entities
+ * A form element that presents a file upload and an image preview if
+ * a value exists for that element
  * 
  * @category   Galahad
  * @package    Galahad_Form

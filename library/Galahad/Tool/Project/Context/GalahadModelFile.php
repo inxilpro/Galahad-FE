@@ -35,35 +35,36 @@ require_once 'Zend/CodeGenerator/Php/File.php';
 require_once 'Zend/Filter/Word/DashToCamelCase.php';
 
 /**
- * Context for creating a Form file
+ * Context for creating a Galahad-style model
  * 
  * @category   Galahad
  * @package    Galahad_Tool
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Context_FormFile extends Zend_Tool_Project_Context_Filesystem_File 
+class Galahad_Tool_Project_Context_GalahadModelFile extends Zend_Tool_Project_Context_Filesystem_File 
 {
     /**
      * @var string
      */
-    protected $_filesystemName = 'FormName';
+    protected $_filesystemName = 'modelName';
     
     /** @var string */
-    protected $_formName = 'formName';
+    protected $_tableName = 'modelName';
+    
+    /** @var string */
+    protected $_moduleName = 'Default';
     
     /**
      * init()
      *
-     * @return Galahad_Tool_Project_Context_FormFile
+     * @return Galahad_Tool_Project_Context_GalahadModelFile
      */
     public function init()
     {
-        $this->_formName = $this->_resource->getAttribute('formName');
-        
-        $filter = new Zend_Filter_Word_DashToCamelCase();
-        $this->_filesystemName = $filter->filter($this->_formName) . '.php';
-        
+        $this->_moduleName = $this->_resource->getAttribute('moduleName');
+        $this->_modelName = $this->_resource->getAttribute('modelName');
+        $this->_filesystemName = ucfirst($this->_modelName) . '.php';
         parent::init();
         return $this;
     }
@@ -76,7 +77,7 @@ class Galahad_Tool_Project_Context_FormFile extends Zend_Tool_Project_Context_Fi
     public function getPersistentAttributes()
     {
         return array(
-			'formName' => $this->getFormName()
+			'modelName' => $this->getModelName()
         );
     }
     
@@ -87,17 +88,17 @@ class Galahad_Tool_Project_Context_FormFile extends Zend_Tool_Project_Context_Fi
      */
     public function getName()
     {
-        return 'FormFile';
+        return 'GalahadModelFile';
     }
     
     /**
-     * getFormName()
+     * getModelName()
      *
      * @return string
      */
-    public function getFormName()
+    public function getModelName()
     {
-        return $this->_formName;
+        return $this->_modelName;
     }
   
     /**
@@ -107,29 +108,28 @@ class Galahad_Tool_Project_Context_FormFile extends Zend_Tool_Project_Context_Fi
      */
     public function getContents()
     {
-        $moduleName = 'Default';
-        $parent = $this->_resource->getParentResource()->getParentResource()->getParentResource()->getContext();
-        if ($parent instanceof Zend_Tool_Project_Context_Zf_ModuleDirectory) {
-            $moduleName = ucfirst($parent->getModuleName());
-        }
-        
+
         $filter = new Zend_Filter_Word_DashToCamelCase();
-        $className = $moduleName . '_Form_' . $filter->filter($this->_formName);
+        
+        $className = ($this->_moduleName ? ucfirst($this->_moduleName) : 'Default');
+        $className .= '_Model_' . $filter->filter($this->_modelName);
         
         $codeGenFile = new Zend_CodeGenerator_Php_File(array(
             'fileName' => $this->getPath(),
             'classes' => array(
                 new Zend_CodeGenerator_Php_Class(array(
                     'name' => $className,
-                    'extendedClass' => 'Zend_Form',
+                    'extendedClass' => 'Galahad_Model_Entity',
+                    /*
                     'methods' => array(
-                		array(
-                			'name' => 'init',
-                			'body' => "\t\t// Use the init() method to generate your form",
-                		),
-                	),
-                )),
-            ),
+                        new Zend_CodeGenerator_Php_Method(array(
+                            'name' => 'fixMe',
+                            'body' => '// FIXME',
+                        ))
+                    )
+                    */
+                ))
+            )
         ));
         
         // store the generator into the registry so that the addProperty command can use the same object later

@@ -32,7 +32,7 @@ require_once 'Galahad/Tool/Project/Provider/Abstract.php';
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Provider_ModelProperty extends Galahad_Tool_Project_Provider_Abstract
+class Galahad_Tool_Project_Provider_GalahadModelProperty extends Galahad_Tool_Project_Provider_Abstract
 {
     /**
      * createResource()
@@ -46,15 +46,15 @@ class Galahad_Tool_Project_Provider_ModelProperty extends Galahad_Tool_Project_P
     public static function createResource(Zend_Tool_Project_Profile $profile, $propertyName, $modelName, $moduleName = null)
     {
         if (!is_string($propertyName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_ModelProperty::createResource() expects \"propertyName\" is the name of a property resource to create.');
+            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_GalahadModelProperty::createResource() expects \"propertyName\" is the name of a property resource to create.');
         }
 
         if (!is_string($modelName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_ModelProperty::createResource() expects \"modelName\" is the name of a model resource to create.');
+            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_GalahadModelProperty::createResource() expects \"modelName\" is the name of a model resource to create.');
         }
 
         $modelFile = self::_getModelFileResource($profile, $modelName, $moduleName);   
-        $propertyMethod = $modelFile->createResource('ModelPropertyMethods', array('propertyName' => $propertyName));
+        $propertyMethod = $modelFile->createResource('galahadModelPropertyMethods', array('propertyName' => $propertyName));
         return $propertyMethod;
     }
 
@@ -70,15 +70,15 @@ class Galahad_Tool_Project_Provider_ModelProperty extends Galahad_Tool_Project_P
     public static function hasResource(Zend_Tool_Project_Profile $profile, $propertyName, $modelName, $moduleName = null)
     {
         if (!is_string($propertyName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_ModelProperty::hasResource() expects \"propertyName\" is the name of a property resource to create.');
+            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_GalahadModelProperty::hasResource() expects \"propertyName\" is the name of a property resource to create.');
         }
         
         if (!is_string($modelName)) {
-            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_ModelProperty::hasResource() expects \"modelName\" is the name of a model resource to create.');
+            throw new Zend_Tool_Project_Provider_Exception('Galahad_Tool_Project_Provider_GalahadModelProperty::hasResource() expects \"modelName\" is the name of a model resource to create.');
         }
         
         $modelFile = self::_getModelFileResource($profile, $modelName, $moduleName);
-        return (($modelFile->search(array('modelPropertyMethods' => array('propertyName' => $propertyName)))) instanceof Zend_Tool_Project_Profile_Resource);
+        return (($modelFile->search(array('galahadModelPropertyMethods' => array('propertyName' => $propertyName)))) instanceof Zend_Tool_Project_Profile_Resource);
     }
 
     /**
@@ -98,7 +98,7 @@ class Galahad_Tool_Project_Provider_ModelProperty extends Galahad_Tool_Project_P
         }
 
         $profileSearchParams[] = 'modelsDirectory';
-        $profileSearchParams['modelFile'] = array('modelName' => $modelName);
+        $profileSearchParams['galahadModelFile'] = array('modelName' => $modelName);
 
         return $profile->search($profileSearchParams);
     }
@@ -126,7 +126,7 @@ class Galahad_Tool_Project_Provider_ModelProperty extends Galahad_Tool_Project_P
         $propertyMethod->create();
         
         if ($addToForm) {
-        	$formElementResource = Galahad_Tool_Project_Provider_FormElement::createResource($this->_loadedProfile, $name, $parentModel, 'text', false, $module);
+        	$formElementResource = Galahad_Tool_Project_Provider_GalahadFormElement::createResource($this->_loadedProfile, $name, $parentModel, 'text', false, $module);
 			$this->_registry->getResponse()->appendContent('Adding element to associated form for property ' . $name);
 			$formElementResource->create();
         }

@@ -42,7 +42,7 @@ require_once 'Zend/Filter/Word/DashToCamelCase.php';
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Context_CollectionFile extends Zend_Tool_Project_Context_Filesystem_File 
+class Galahad_Tool_Project_Context_GalahadCollectionFile extends Zend_Tool_Project_Context_Filesystem_File 
 {
     /**
      * @var string
@@ -55,7 +55,7 @@ class Galahad_Tool_Project_Context_CollectionFile extends Zend_Tool_Project_Cont
     /**
      * init()
      *
-     * @return Galahad_Tool_Project_Context_CollectionFile
+     * @return Galahad_Tool_Project_Context_GalahadCollectionFile
      */
     public function init()
     {
@@ -87,7 +87,7 @@ class Galahad_Tool_Project_Context_CollectionFile extends Zend_Tool_Project_Cont
      */
     public function getName()
     {
-        return 'CollectionFile';
+        return 'GalahadCollectionFile';
     }
     
     /**

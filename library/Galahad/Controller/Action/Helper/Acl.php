@@ -23,7 +23,7 @@
 require_once 'Zend/Controller/Action/Helper/Abstract.php';
 
 /**
- * Provides a basic wrapper around an array of Entities
+ * Provides basic access to your ACL in your controllers
  * 
  * @category   Galahad
  * @package    Galahad_Controller

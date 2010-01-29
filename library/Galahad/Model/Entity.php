@@ -77,8 +77,17 @@ abstract class Galahad_Model_Entity extends Galahad_Model
             $property = $filter->filter($property);
             $method = "set{$property}";
             
+            // TODO: Refactor?
             if (!method_exists($this, $method)) {
-            	throw new BadMethodCallException("No property '$property' exists");
+            	// Where foreign key, set the relationship
+            	if ('Id' == substr($method, -2)) {
+            		$method = substr($method, 0, -2);
+            		if (!method_exists($this, $method)) {
+            			throw new BadMethodCallException("No property '$property' exists");
+            		}
+            	} else {
+            		throw new BadMethodCallException("No property '$property' exists");
+            	}
             }
             
             $this->$method($value);

@@ -62,7 +62,7 @@ require_once 'Galahad/Model/Entity.php';
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Project_Context_Interface
+class Galahad_Tool_Project_Context_GalahadModelPropertyMethods implements Zend_Tool_Project_Context_Interface
 {
     /**
      * @var Zend_Tool_Project_Profile_Resource
@@ -88,7 +88,7 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
     /**
      * init()
      *
-     * @return Galahad_Tool_Project_Context_ModelPropertyMethods
+     * @return Galahad_Tool_Project_Context_GalahadModelPropertyMethods
      */
     public function init()
     {
@@ -96,9 +96,9 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
         
         $this->_resource->setAppendable(false);
         $this->_modelResource = $this->_resource->getParentResource();
-        if (!$this->_modelResource->getContext() instanceof Galahad_Tool_Project_Context_ModelFile) {
+        if (!$this->_modelResource->getContext() instanceof Galahad_Tool_Project_Context_GalahadModelFile) {
             require_once 'Zend/Tool/Project/Context/Exception.php';
-            throw new Zend_Tool_Project_Context_Exception('ModelPropertyMethods must be a sub resource of a ModelFile');
+            throw new Zend_Tool_Project_Context_Exception('GalahadModelPropertyMethods must be a sub resource of a ModelFile');
         }
         
         $this->_modelPath = $this->_modelResource->getContext()->getPath();
@@ -137,14 +137,14 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
      */
     public function getName()
     {
-        return 'ModelPropertyMethods';
+        return 'GalahadModelPropertyMethods';
     }
     
     /**
      * setResource()
      *
      * @param Zend_Tool_Project_Profile_Resource $resource
-     * @return Galahad_Tool_Project_Context_ModelPropertyMethods
+     * @return Galahad_Tool_Project_Context_GalahadModelPropertyMethods
      */
     public function setResource(Zend_Tool_Project_Profile_Resource $resource)
     {
@@ -156,7 +156,7 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
      * setPropertyName()
      *
      * @param string $propertyName
-     * @return Galahad_Tool_Project_Context_ModelPropertyMethods
+     * @return Galahad_Tool_Project_Context_GalahadModelPropertyMethods
      */
     public function setPropertyName($propertyName)
     {
@@ -177,7 +177,7 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
     /**
      * create()
      *
-     * @return Galahad_Tool_Project_Context_ModelPropertyMethods
+     * @return Galahad_Tool_Project_Context_GalahadModelPropertyMethods
      */
     public function create()
     {
@@ -193,7 +193,7 @@ class Galahad_Tool_Project_Context_ModelPropertyMethods implements Zend_Tool_Pro
     /**
      * delete()
      *
-     * @return Galahad_Tool_Project_Context_ModelPropertyMethods
+     * @return Galahad_Tool_Project_Context_GalahadModelPropertyMethods
      */
     public function delete()
     {

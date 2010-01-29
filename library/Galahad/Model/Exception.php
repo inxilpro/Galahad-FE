@@ -13,41 +13,22 @@
  * General Public License for more details.
  * 
  * @category  Galahad
- * @package   Galahad_Tool
+ * @package   Galahad
  * @copyright Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license   GPL <http://www.gnu.org/licenses/>
  * @version   0.3
  */
 
-/**
- * @see Zend_Tool_Project_Context_Filesystem_Directory
- */
-require_once 'Zend/Tool/Project/Context/Filesystem/Directory.php';
+/** @see Zend_Exception */
+require_once 'Zend/Exception.php';
 
 /**
- * Data Mapper Directory
+ * Galahad_Model base exception
  * 
- * @category   Zend
- * @package    Zend_Tool
- * @copyright  Copyright (c) 2005-2009 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @category   Galahad
+ * @package    Galahad_Model
+ * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
+ * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Context_CollectionDirectory extends Zend_Tool_Project_Context_Filesystem_Directory
-{
-
-    /**
-     * @var string
-     */
-    protected $_filesystemName = 'Collection';
-    
-    /**
-     * getName()
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return 'CollectionDirectory';
-    }
-
-}
+class Galahad_Model_Exception extends Zend_Exception
+{}

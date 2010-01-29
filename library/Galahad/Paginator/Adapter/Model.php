@@ -20,7 +20,7 @@
  */
 
 /**
- * Provides base functionality for data mappers
+ * Paginator for Galahad_Model_Entity objects via a Galahad_Model_DataMapper
  * 
  * @category   Galahad
  * @package    Galahad_Paginator

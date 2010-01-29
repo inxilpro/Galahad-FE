@@ -47,7 +47,7 @@ require_once 'Zend/Filter/Word/CamelCaseToUnderscore.php';
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Context_DbTableFile extends Zend_Tool_Project_Context_Filesystem_File 
+class Galahad_Tool_Project_Context_GalahadDbTableFile extends Zend_Tool_Project_Context_Filesystem_File 
 {
     /**
      * @var string
@@ -60,7 +60,7 @@ class Galahad_Tool_Project_Context_DbTableFile extends Zend_Tool_Project_Context
     /**
      * init()
      *
-     * @return Galahad_Tool_Project_Context_DbTableFile
+     * @return Galahad_Tool_Project_Context_GalahadDbTableFile
      */
     public function init()
     {
@@ -92,7 +92,7 @@ class Galahad_Tool_Project_Context_DbTableFile extends Zend_Tool_Project_Context
      */
     public function getName()
     {
-        return 'DbTableFile';
+        return 'GalahadDbTableFile';
     }
     
     /**

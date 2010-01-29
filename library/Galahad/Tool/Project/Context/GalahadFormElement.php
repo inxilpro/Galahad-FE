@@ -70,7 +70,7 @@ require_once 'Galahad/CodeGenerator/Php/OverwritableClass.php';
  * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Context_Interface
+class Galahad_Tool_Project_Context_GalahadFormElement implements Zend_Tool_Project_Context_Interface
 {
     /**
      * @var Zend_Tool_Project_Profile_Resource
@@ -105,7 +105,7 @@ class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Cont
     /**
      * init()
      *
-     * @return Galahad_Tool_Project_Context_FormElement
+     * @return Galahad_Tool_Project_Context_GalahadFormElement
      */
     public function init()
     {
@@ -115,9 +115,9 @@ class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Cont
         
         $this->_resource->setAppendable(false);
         $this->_formResource = $this->_resource->getParentResource();
-        if (!$this->_formResource->getContext() instanceof Galahad_Tool_Project_Context_FormFile) {
+        if (!$this->_formResource->getContext() instanceof Zend_Tool_Project_Context_Zf_FormFile) {
             require_once 'Zend/Tool/Project/Context/Exception.php';
-            throw new Zend_Tool_Project_Context_Exception('FormElement must be a sub resource of a FormFile');
+            throw new Zend_Tool_Project_Context_Exception('GalahadFormElement must be a sub resource of a FormFile');
         }
         
         $this->_formPath = $this->_formResource->getContext()->getPath();
@@ -147,14 +147,14 @@ class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Cont
      */
     public function getName()
     {
-        return 'FormElement';
+        return 'GalahadFormElement';
     }
     
     /**
      * setResource()
      *
      * @param Zend_Tool_Project_Profile_Resource $resource
-     * @return Galahad_Tool_Project_Context_FormElement
+     * @return Galahad_Tool_Project_Context_GalahadFormElement
      */
     public function setResource(Zend_Tool_Project_Profile_Resource $resource)
     {
@@ -166,7 +166,7 @@ class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Cont
      * setElementName()
      *
      * @param string $elementName
-     * @return Galahad_Tool_Project_Context_FormElement
+     * @return Galahad_Tool_Project_Context_GalahadFormElement
      */
     public function setElementName($elementName)
     {
@@ -187,7 +187,7 @@ class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Cont
     /**
      * create()
      *
-     * @return Galahad_Tool_Project_Context_FormElement
+     * @return Galahad_Tool_Project_Context_GalahadFormElement
      */
     public function create()
     {
@@ -203,7 +203,7 @@ class Galahad_Tool_Project_Context_FormElement implements Zend_Tool_Project_Cont
     /**
      * delete()
      *
-     * @return Galahad_Tool_Project_Context_FormElement
+     * @return Galahad_Tool_Project_Context_GalahadFormElement
      */
     public function delete()
     {

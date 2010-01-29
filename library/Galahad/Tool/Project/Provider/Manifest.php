@@ -20,44 +20,34 @@
  */
 
 /**
- * @see Galahad_Tool_Project_Provider_Scaffold
+ * @see Galahad_Tool_Project_Provider_GalahadModel
  */
-require_once 'Galahad/Tool/Project/Provider/Models.php';
+require_once 'Galahad/Tool/Project/Provider/GalahadModel.php';
 
 /**
- * @see Galahad_Tool_Project_Provider_Model
+ * @see Galahad_Tool_Project_Provider_GalahadModelProperty
  */
-require_once 'Galahad/Tool/Project/Provider/Model.php';
+require_once 'Galahad/Tool/Project/Provider/GalahadModelProperty.php';
 
 /**
- * @see Galahad_Tool_Project_Provider_ModelProperty
+ * @see Galahad_Tool_Project_Provider_GalahadDbTable
  */
-require_once 'Galahad/Tool/Project/Provider/ModelProperty.php';
-
-/**
- * @see Galahad_Tool_Project_Provider_DbTable
- */
-require_once 'Galahad/Tool/Project/Provider/DbTable.php';
+require_once 'Galahad/Tool/Project/Provider/GalahadDbTable.php';
 
 /**
  * @see Galahad_Tool_Project_Provider_Form
  */
-require_once 'Galahad/Tool/Project/Provider/Form.php';
+require_once 'Galahad/Tool/Project/Provider/GalahadFormElement.php';
 
 /**
- * @see Galahad_Tool_Project_Provider_Form
+ * @see Galahad_Tool_Project_Provider_GalahadDataMapper
  */
-require_once 'Galahad/Tool/Project/Provider/FormElement.php';
+require_once 'Galahad/Tool/Project/Provider/GalahadDataMapper.php';
 
 /**
- * @see Galahad_Tool_Project_Provider_DataMapper
+ * @see Galahad_Tool_Project_Provider_GalahadDataMapper
  */
-require_once 'Galahad/Tool/Project/Provider/DataMapper.php';
-
-/**
- * @see Galahad_Tool_Project_Provider_DataMapper
- */
-require_once 'Galahad/Tool/Project/Provider/Collection.php';
+require_once 'Galahad/Tool/Project/Provider/GalahadCollection.php';
 
 /**
  * @see Zend_Tool_Framework_Manifest_ProviderManifestable
@@ -82,14 +72,12 @@ class Galahad_Tool_Project_Provider_Manifest implements Zend_Tool_Framework_Mani
     public function getProviders()
     {
         return array(
-            new Galahad_Tool_Project_Provider_Models(),
-            new Galahad_Tool_Project_Provider_Model(),
-            new Galahad_Tool_Project_Provider_ModelProperty(),
-            new Galahad_Tool_Project_Provider_DbTable(),
-            new Galahad_Tool_Project_Provider_Form(),
-            new Galahad_Tool_Project_Provider_FormElement(),
-            new Galahad_Tool_Project_Provider_DataMapper(),
-            new Galahad_Tool_Project_Provider_Collection(),
+            new Galahad_Tool_Project_Provider_GalahadModel(),
+            new Galahad_Tool_Project_Provider_GalahadModelProperty(),
+            new Galahad_Tool_Project_Provider_GalahadDbTable(),
+            new Galahad_Tool_Project_Provider_GalahadFormElement(),
+            new Galahad_Tool_Project_Provider_GalahadDataMapper(),
+            new Galahad_Tool_Project_Provider_GalahadCollection(),
         );
     }
 }
