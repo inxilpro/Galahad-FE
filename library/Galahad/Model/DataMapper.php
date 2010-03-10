@@ -76,6 +76,7 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	 * 
 	 * @todo Maybe make a non-abstract version of this
 	 * @param Galahad_Model_ConstraintInterface $constraint
+	 * @return Galahad_Model_Collection
 	 */
 	abstract public function fetchAll(Galahad_Model_ConstraintInterface $constraint = null);
 	
