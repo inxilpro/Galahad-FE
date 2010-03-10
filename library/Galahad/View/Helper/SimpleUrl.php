@@ -36,7 +36,8 @@ class Galahad_View_Helper_SimpleUrl extends Zend_View_Helper_Abstract
 {
     /**
      * Generates URL
-     * @return array
+     * @see Zend_Controller_Action_Helper_Redirector::setGotoSimple()
+     * @return string
      */
     public function simpleUrl($action, $controller = null, $module = null, array $params = array())
     {
