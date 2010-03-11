@@ -248,7 +248,7 @@ class Galahad_Tool_Project_Context_GalahadModelPropertyMethods implements Zend_T
                         'datatype' => 'mixed',
                     )),
                     'return' => new Zend_CodeGenerator_Php_Docblock_Tag_Return(array(
-                        'datatype' => 'Galahad_Entity',
+                        'datatype' => $modelCodeGenFile->getClass()->getName(),
                     )),
                 ),
             ),
