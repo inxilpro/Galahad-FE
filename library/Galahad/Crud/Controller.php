@@ -144,7 +144,7 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
      * @param Zend_Form $form
      * @param Default_Model_Entity $entity
      */
-	protected function _save(Zend_Form $form, Default_Model_Coupon $entity = null)
+	protected function _save(Zend_Form $form, Galahad_Model_Entity $entity = null)
     {
     	$request = $this->getRequest();
     	
@@ -156,7 +156,7 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
 			$data = $form->getValues();
 			
     		if (null == $entity) {
-				$entity = new Default_Model_Coupon();
+				$entity = new $this->_entityClass();
 			}
 			
 			// Manipulate Data
