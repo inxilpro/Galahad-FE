@@ -14,7 +14,7 @@
  * 
  * @category  Galahad
  * @package   Galahad_Tool
- * @copyright Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
+ * @copyright Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license   GPL <http://www.gnu.org/licenses/>
  * @version   0.3
  */
@@ -34,7 +34,7 @@ require_once 'Galahad/Tool/Project/Provider/Abstract.php';
  * 
  * @category   Galahad
  * @package    Galahad_Tool
- * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
+ * @copyright  Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
 class Galahad_Tool_Project_Provider_GalahadModel extends Galahad_Tool_Project_Provider_Abstract
@@ -52,6 +52,8 @@ class Galahad_Tool_Project_Provider_GalahadModel extends Galahad_Tool_Project_Pr
         // determine if testing is enabled in the project
         // require_once 'Zend/Tool/Project/Provider/Test.php';
         // $testingEnabled = Zend_Tool_Project_Provider_Test::isTestingEnabled($this->_loadedProfile);
+        
+        $name = strtolower($name);
 
         if (self::hasResource($this->_loadedProfile, $name, $module)) {
             throw new Zend_Tool_Project_Provider_Exception('This project already has a model named ' . $name);

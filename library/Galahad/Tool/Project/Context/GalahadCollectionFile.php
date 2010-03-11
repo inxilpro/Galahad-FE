@@ -14,7 +14,7 @@
  * 
  * @category  Galahad
  * @package   Galahad_Tool
- * @copyright Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
+ * @copyright Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license   GPL <http://www.gnu.org/licenses/>
  * @version   0.3
  */
@@ -39,7 +39,7 @@ require_once 'Zend/Filter/Word/DashToCamelCase.php';
  * 
  * @category   Galahad
  * @package    Galahad_Tool
- * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
+ * @copyright  Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
 class Galahad_Tool_Project_Context_GalahadCollectionFile extends Zend_Tool_Project_Context_Filesystem_File 

@@ -14,7 +14,7 @@
  * 
  * @category  Galahad
  * @package   Galahad
- * @copyright Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
+ * @copyright Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license   GPL <http://www.gnu.org/licenses/>
  * @version   0.3
  */
@@ -29,7 +29,7 @@ require_once 'Zend/View/Helper/Abstract.php';
  * 
  * @category   Galahad
  * @package    Galahad_View
- * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
+ * @copyright  Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
 class Galahad_View_Helper_SimpleUrl extends Zend_View_Helper_Abstract

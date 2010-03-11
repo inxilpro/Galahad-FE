@@ -14,7 +14,7 @@
  * 
  * @category  Galahad
  * @package   Galahad
- * @copyright Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
+ * @copyright Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license   GPL <http://www.gnu.org/licenses/>
  * @version   0.3
  */
@@ -27,7 +27,7 @@ require_once 'Zend/Db/Table.php';
  * 
  * @category   Galahad
  * @package    Galahad_Model
- * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
+ * @copyright  Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
 class Galahad_Model_DbTable extends Zend_Db_Table 

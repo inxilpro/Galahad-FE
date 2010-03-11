@@ -14,7 +14,7 @@
  * 
  * @category  Galahad
  * @package   Galahad_Tool
- * @copyright Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
+ * @copyright Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license   GPL <http://www.gnu.org/licenses/>
  * @version   0.3
  */
@@ -34,7 +34,7 @@ require_once 'Galahad/Tool/Project/Provider/Model.php';
  * 
  * @category   Galahad
  * @package    Galahad_Tool
- * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
+ * @copyright  Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
 class Galahad_Tool_Project_Provider_Models extends Galahad_Tool_Project_Provider_Abstract 

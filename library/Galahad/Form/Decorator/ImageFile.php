@@ -14,7 +14,7 @@
  * 
  * @category  Galahad
  * @package   Galahad
- * @copyright Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
+ * @copyright Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license   GPL <http://www.gnu.org/licenses/>
  * @version   0.3
  */
@@ -28,7 +28,7 @@ require_once 'Zend/Form/Decorator/File.php';
  * 
  * @category   Galahad
  * @package    Galahad_Form
- * @copyright  Copyright (c) 2009 Chris Morrell <http://cmorrell.com>
+ * @copyright  Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
 class Galahad_Form_Decorator_ImageFile extends Zend_Form_Decorator_File
