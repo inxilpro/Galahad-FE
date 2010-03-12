@@ -136,7 +136,9 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
     		 
     	$form->setDefaults($defaults);
     	$this->_save($form, $entity);
+    	
     	$this->view->form = $form;
+    	$this->view->entity = $entity;
     }
     
     /**
