@@ -98,7 +98,9 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
     		 ->setMethod('post');
     		 
 		$form->removeElement('id');
-    		 
+
+		$form = $this->_tweakInsertForm($form);
+		
 		$this->_save($form);
 		$this->view->form = $form;
     }
@@ -130,6 +132,8 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
     	$form->addElement('submit', 'submit', array('label' => 'Save Changes', 'class' => 'large button'))
     		 ->setAction($this->_helper->url('edit'))
     		 ->setMethod('post');
+    		 
+    	$form = $this->_tweakEditForm($form);
 		
     	$defaults = $entity->toArray();   
     	$defaults = $this->_processDefaults($defaults);
