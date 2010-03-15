@@ -44,10 +44,38 @@ abstract class Galahad_Model_Entity
     protected $_data = array();
     
     /**
+     * ACL
+     * 
+     * @var Zend_Acl
+     */
+    protected $_acl = null;
+    
+    /**
+     * Default ACL
+     * 
+     * @var Zend_Acl
+     */
+    protected static $_defaultAcl;
+    
+    /**
      * Resource ID for ACL
      * @var string
      */
-    protected $_resourceId;
+    protected $_resourceId = null;
+    
+    /**
+     * Default identity string to use for ACL
+     * 
+     * @var string
+     */
+    protected static $_defaultIdentity = 'guest';
+    
+    /**
+     * Identity of user accessing this model
+     * 
+     * @var string
+     */
+    protected $_identity = null;
     
     /**
      * Basic constructor functionality
@@ -178,6 +206,75 @@ abstract class Galahad_Model_Entity
         return $form;
     }
     
+    protected public function setDefaultAcl(Zend_Acl $acl)
+    {
+    	self::$_defaultAcl = $acl;
+    }
+    
+    protected public function getDefaultAcl()
+    {
+    	return self::$_defaultAcl;
+    }
+    
+    /**
+     * Set the ACL
+     * 
+     * @param Zend_Acl $acl
+     */
+    public function setAcl(Zend_Acl $acl)
+    {
+    	$this->_acl = $acl;
+    	return $this;
+    }
+    
+    /**
+     * Gets the current ACL or creates a new one
+     * 
+     * @return Zend_Acl
+     */
+    public function getAcl()
+    {
+    	if (null === $this->_acl) {
+    		// Lazy Load ACL
+    		if (null !== ($defaultAcl = self::getDefaultAcl())) {
+    			$this->_acl = $defaultAcl;
+    		} else {
+    			$this->_acl = new Zend_Acl();
+    		}
+    		
+    		// Add Model to ACL
+    		if (!$this->_acl->has($this->getResourceId())) {
+    			$this->_acl->add($this);
+    		}
+    		
+    		// Init ACL
+    		$this->_initAcl($this->_acl);
+    	}
+    	
+    	return $this->_acl;
+    }
+    
+    /**
+     * Initialize the ACL for your model (subclass this)
+     * 
+     * Example:
+     * <code>
+     * <?php
+     * protected function _initAcl(Zend_Acl $acl)
+     * {
+     *      $acl->allow('guest', $this, array('view'));
+     *      return $this;
+     * }
+     * ?>
+     * </code>
+     * 
+     * @return Galahad_Model_Entity
+     */
+    protected function _initAcl(Zend_Acl $acl)
+    {
+    	return $this;
+    }
+    
     /**
      * Set the model's resource ID
      * 
@@ -204,6 +301,73 @@ abstract class Galahad_Model_Entity
     	}
     	
     	return $this->_resourceId;
+    }
+    
+    /**
+     * Set the default identity for all Entities
+     * By default this is "guest"
+     * 
+     * @param mixed $identity
+     */
+    public static function setDefaultIdentity($identity)
+    {
+    	if (!$identity = self::_extractIdentity($identity)) {
+    		throw new InvalidArgumentException('Invalid default identity'); // TODO: Custom Exception
+    	}
+    	
+    	self::$_defaultIdentity = $identity;
+    }
+    
+    /**
+     * Get the current default identity
+     * 
+     * @return mixed
+     */
+    public static function getDefaultIdentity()
+    {
+    	return self::$_defaultIdentity;
+    }
+    
+    /**
+     * Determine if a passed identity is valid
+     * 
+     * @param mixed $identity
+     */
+    private static function _extractIdentity($identity)
+    {
+    	if (is_array($identity) && isset($identity['role'])) {
+    		return $identity['role'];
+    	} elseif (is_scalar($identity) && !is_bool($identity)) {
+    		return $identity;
+    	} elseif ($identity instanceof Zend_Acl_Role_Interface) {
+    		return $identity;
+    	}
+    	
+    	return false;
+    }
+    
+    public function setIdentity($identity)
+    {
+    	// TODO: Should this just throw an exception?
+    	if (!$identity = self::_extractIdentity($identity)) {
+			$identity = self::getDefaultIdentity();
+    	}
+    	
+    	$this->_identity = $identity;
+    }
+    
+    public function getIdentity()
+    {
+		if (null === $this->_identity) {
+			$auth = Zend_Auth::getInstance();
+            if ($auth->hasIdentity()) {
+				$this->setIdentity($auth->getIdentity());
+            }
+            
+            $this->setIdentity(self::getDefaultIdentity());
+        }
+
+        return $this->_identity;
     }
     
     /**
