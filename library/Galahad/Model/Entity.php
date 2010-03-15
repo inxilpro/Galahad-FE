@@ -33,13 +33,21 @@ require_once 'Zend/Filter/Word/UnderscoreToCamelCase.php';
  * @copyright  Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-abstract class Galahad_Model_Entity extends Galahad_Model
+abstract class Galahad_Model_Entity
+	extends Galahad_Model
+	implements Zend_Acl_Resource_Interface
 {
     /**
      * Stores entity's property data
      * @var array
      */
     protected $_data = array();
+    
+    /**
+     * Resource ID for ACL
+     * @var string
+     */
+    protected $_resourceId;
     
     /**
      * Basic constructor functionality
@@ -168,6 +176,34 @@ abstract class Galahad_Model_Entity extends Galahad_Model
         }
         
         return $form;
+    }
+    
+    /**
+     * Set the model's resource ID
+     * 
+     * @param string $resourceId
+     * @return Galahad_Model_Entity
+     */
+    public function setResourceId($resourceId)
+    {
+    	// TODO: Verify $resourceId type
+    	$this->_resourceId = $resourceId;
+    	return $this;
+    }
+    
+    /**
+     * Get the model's resource ID
+     * 
+     * @see Zend_Acl_Resource_Interface
+     * @return string
+     */
+    public function getResourceId()
+    {
+    	if (null === $this->_resourceId) {
+    		$this->_resourceId = get_class($this);
+    	}
+    	
+    	return $this->_resourceId;
     }
     
     /**
