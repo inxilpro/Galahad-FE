@@ -346,6 +346,11 @@ abstract class Galahad_Model_Entity
     	return false;
     }
     
+    /**
+     * Set the accessing user's identity
+     * 
+     * @param mixed $identity
+     */
     public function setIdentity($identity)
     {
     	// TODO: Should this just throw an exception?
@@ -356,6 +361,11 @@ abstract class Galahad_Model_Entity
     	$this->_identity = $identity;
     }
     
+    /**
+     * Get the accessing user's identity (and lazy load if necessary)
+     * 
+     * @return mixed
+     */
     public function getIdentity()
     {
 		if (null === $this->_identity) {
