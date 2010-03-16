@@ -237,6 +237,10 @@ abstract class Galahad_Model_Entity
     public function setAcl(Zend_Acl $acl)
     {
     	$this->_acl = $acl;
+		if (!$this->_acl->has($this->getResourceId())) {
+			$this->_acl->add($this);
+		}
+		$this->_initAcl($this->_acl);
     	return $this;
     }
     
@@ -250,18 +254,10 @@ abstract class Galahad_Model_Entity
     	if (null === $this->_acl) {
     		// Lazy Load ACL
     		if (null !== ($defaultAcl = self::getDefaultAcl())) {
-    			$this->_acl = $defaultAcl;
+    			$this->setAcl($defaultAcl);
     		} else {
-    			$this->_acl = new Galahad_Acl();
+    			$this->setAcl(new Galahad_Acl());
     		}
-    		
-    		// Add Model to ACL
-    		if (!$this->_acl->has($this->getResourceId())) {
-    			$this->_acl->add($this);
-    		}
-    		
-    		// Init ACL
-    		$this->_initAcl($this->_acl);
     	}
     	
     	return $this->_acl;
