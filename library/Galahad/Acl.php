@@ -70,7 +70,7 @@ class Galahad_Acl extends Zend_Acl
      */
 	public function addResource($resource, $parent = null)
     {
-    	// Build resource tree if necessary
+    	// Build resource chain if necessary
     	if (null == $parent) {
 	        if (is_string($resource)) {
 	            $resource = new Zend_Acl_Resource($resource);
@@ -83,7 +83,7 @@ class Galahad_Acl extends Zend_Acl
 	
 	        $resourceId = $resource->getResourceId();
 	        
-	        if (preg_match('/^(\w+):(\w+)(\.\w+)*$/i', $resourceId, $matches)) {
+	        if (preg_match('/^(\w+):(\w+(?:\.\w+)*)$/i', $resourceId, $matches)) {
 	        	$parent = $this->_getParentResourceName($matches[1], $matches[2]);
 	        	if (!$this->has($parent)) {
 	        		$this->addResource($parent);
