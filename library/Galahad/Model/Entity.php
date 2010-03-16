@@ -206,11 +206,21 @@ abstract class Galahad_Model_Entity
         return $form;
     }
     
+    /**
+     * Use this ACL if none supplied
+     * 
+     * @param Zend_Acl $acl
+     */
     protected public function setDefaultAcl(Zend_Acl $acl)
     {
     	self::$_defaultAcl = $acl;
     }
     
+    /**
+     * Get default ACL
+     * 
+     * @return Zend_Acl
+     */
     protected public function getDefaultAcl()
     {
     	return self::$_defaultAcl;
@@ -331,6 +341,7 @@ abstract class Galahad_Model_Entity
     /**
      * Determine if a passed identity is valid
      * 
+     * @link http://weierophinney.net/matthew/archives/201-Applying-ACLs-to-Models.html
      * @param mixed $identity
      */
     private static function _extractIdentity($identity)
