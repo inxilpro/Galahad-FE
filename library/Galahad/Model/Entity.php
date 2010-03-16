@@ -252,7 +252,7 @@ abstract class Galahad_Model_Entity
     		if (null !== ($defaultAcl = self::getDefaultAcl())) {
     			$this->_acl = $defaultAcl;
     		} else {
-    			$this->_acl = new Zend_Acl();
+    			$this->_acl = new Galahad_Acl();
     		}
     		
     		// Add Model to ACL
