@@ -35,19 +35,14 @@ class Galahad_Controller_Action_Helper_Acl extends Zend_Controller_Action_Helper
 	/** @var Zend_Acl */
 	private $_acl;
 	
-	/** @var Galahad_Controller_Plugin_Acl */
-	private $_plugin = null;
-	
 	/**
 	 * Constructor
 	 * 
 	 * @param Zend_Acl $acl
-	 * @param Galahad_Controller_Plugin_Acl $plugin
 	 */
-	public function __construct(Zend_Acl $acl, Galahad_Controller_Plugin_Acl $plugin = null)
+	public function __construct(Zend_Acl $acl)
 	{
 		$this->_acl = $acl;
-		$this->_plugin = $plugin;
 	}
 	
 	/**
@@ -63,25 +58,26 @@ class Galahad_Controller_Action_Helper_Acl extends Zend_Controller_Action_Helper
 	}
 	
 	/**
-	 * Redirect to the plugin's auth route/URL
-	 */
-	public function redirect()
-	{
-		$this->getPlugin()->redirect();
-	}
-	
-	/**
-	 * Gets an instance of Galahad_Controller_Plugin_Acl
+	 * Check if currently authenticated user is allowed
 	 * 
-	 * @return Galahad_Controller_Plugin_Acl
+	 * @see Galahad_Model_Entity::_extractRole() Maybe this should use this?
+	 * @param string|Zend_Acl_Resource_Interface $resource
+	 * @param string $privilege
 	 */
-	public function getPlugin()
+	public function authIdentityIsAllowed($resource = null, $privilege = null)
 	{
-		if (null == $this->_plugin) {
-			$this->_plugin = $this->getFrontController()->getPlugin('Galahad_Controller_Plugin_Acl');
-		}
+		$role = null;
 		
-		return $this->_plugin;
+		$auth = Zend_Auth::getInstance();
+		if ($auth->hasIdentity()) {
+			$identity = $auth->getIdentity();
+			if (is_string($identity) || $identity instanceof Zend_Acl_Role_Interface) {
+				$role = $identity;
+			}
+		}
+		// die(var_export($role, true));
+		
+		return $this->_acl->isAllowed($role, $resource, $privilege);
 	}
 	
 	/**
