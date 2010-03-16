@@ -25,6 +25,9 @@ require_once 'Galahad/Model.php';
 /** @see Zend_Filter_Word_UnderscoreToCamelCase */
 require_once 'Zend/Filter/Word/UnderscoreToCamelCase.php';
 
+/** @see Zend_Filter_Word_SeparatorToSeparator */
+require_once 'Zend/Filter/Word/SeparatorToSeparator.php';
+
 /**
  * Provides common model functionality
  * 
@@ -68,14 +71,14 @@ abstract class Galahad_Model_Entity
      * 
      * @var string
      */
-    protected static $_defaultIdentity = 'guest';
+    protected static $_defaultRole = 'guest';
     
     /**
      * Identity of user accessing this model
      * 
      * @var string
      */
-    protected $_identity = null;
+    protected $_role = null;
     
     /**
      * Basic constructor functionality
@@ -211,7 +214,7 @@ abstract class Galahad_Model_Entity
      * 
      * @param Zend_Acl $acl
      */
-    protected public function setDefaultAcl(Zend_Acl $acl)
+    public function setDefaultAcl(Zend_Acl $acl)
     {
     	self::$_defaultAcl = $acl;
     }
@@ -221,7 +224,7 @@ abstract class Galahad_Model_Entity
      * 
      * @return Zend_Acl
      */
-    protected public function getDefaultAcl()
+    public function getDefaultAcl()
     {
     	return self::$_defaultAcl;
     }
@@ -301,94 +304,99 @@ abstract class Galahad_Model_Entity
     /**
      * Get the model's resource ID
      * 
+     * Default resource IDs are in the format:
+     * Default_Model_User -> model:default.model.user
+     * 
      * @see Zend_Acl_Resource_Interface
+     * @see Galahad_Model_Entity::_ensureResource()
      * @return string
      */
     public function getResourceId()
     {
     	if (null === $this->_resourceId) {
-    		$this->_resourceId = get_class($this);
+    		$filter = new Zend_Filter_Word_SeparatorToSeparator('_', '.');
+    		$this->_resourceId = 'model:' . $filter->filter(strtolower(get_class($this)));
     	}
     	
     	return $this->_resourceId;
     }
     
     /**
-     * Set the default identity for all Entities
+     * Set the default role for all Entities
      * By default this is "guest"
      * 
-     * @param mixed $identity
+     * @param mixed $role
      */
-    public static function setDefaultIdentity($identity)
+    public static function setDefaultRole($role)
     {
-    	if (!$identity = self::_extractIdentity($identity)) {
-    		throw new InvalidArgumentException('Invalid default identity'); // TODO: Custom Exception
+    	if (!$role = self::_extractRole($role)) {
+    		throw new InvalidArgumentException('Invalid default role'); // TODO: Custom Exception
     	}
     	
-    	self::$_defaultIdentity = $identity;
+    	self::$_defaultRole = $role;
     }
     
     /**
-     * Get the current default identity
+     * Get the current default role
      * 
      * @return mixed
      */
-    public static function getDefaultIdentity()
+    public static function getDefaultRole()
     {
-    	return self::$_defaultIdentity;
+    	return self::$_defaultRole;
     }
     
     /**
-     * Determine if a passed identity is valid
+     * Set the accessing user's role
+     * 
+     * @param mixed $role
+     */
+    public function setRole($role)
+    {
+    	// TODO: Should this just throw an exception?
+    	if (!$role = self::_extractRole($role)) {
+			$role = self::getDefaultRole();
+    	}
+    	
+    	$this->_role = $role;
+    }
+    
+    /**
+     * Get the accessing user's role (and lazy load if necessary)
+     * 
+     * @return mixed
+     */
+    public function getRole()
+    {
+		if (null === $this->_role) {
+			$auth = Zend_Auth::getInstance();
+            if ($auth->hasIdentity()) {
+				$this->setRole($auth->getIdentity());
+            }
+            
+            $this->setRole(self::getDefaultRole());
+        }
+
+        return $this->_role;
+    }
+    
+	/**
+     * Determine if a passed role is valid
      * 
      * @link http://weierophinney.net/matthew/archives/201-Applying-ACLs-to-Models.html
-     * @param mixed $identity
+     * @param mixed $role
      */
-    private static function _extractIdentity($identity)
+    private static function _extractRole($role)
     {
-    	if (is_array($identity) && isset($identity['role'])) {
-    		return $identity['role'];
-    	} elseif (is_scalar($identity) && !is_bool($identity)) {
-    		return $identity;
-    	} elseif ($identity instanceof Zend_Acl_Role_Interface) {
-    		return $identity;
+    	if (is_array($role) && isset($role['role'])) {
+    		return $role['role'];
+    	} elseif (is_scalar($role) && !is_bool($role)) {
+    		return $role;
+    	} elseif ($role instanceof Zend_Acl_Role_Interface) {
+    		return $role;
     	}
     	
     	return false;
-    }
-    
-    /**
-     * Set the accessing user's identity
-     * 
-     * @param mixed $identity
-     */
-    public function setIdentity($identity)
-    {
-    	// TODO: Should this just throw an exception?
-    	if (!$identity = self::_extractIdentity($identity)) {
-			$identity = self::getDefaultIdentity();
-    	}
-    	
-    	$this->_identity = $identity;
-    }
-    
-    /**
-     * Get the accessing user's identity (and lazy load if necessary)
-     * 
-     * @return mixed
-     */
-    public function getIdentity()
-    {
-		if (null === $this->_identity) {
-			$auth = Zend_Auth::getInstance();
-            if ($auth->hasIdentity()) {
-				$this->setIdentity($auth->getIdentity());
-            }
-            
-            $this->setIdentity(self::getDefaultIdentity());
-        }
-
-        return $this->_identity;
     }
     
     /**

@@ -13,7 +13,7 @@
  * General Public License for more details.
  * 
  * @category  Galahad
- * @package   Galahad
+ * @package   Galahad_Controller
  * @copyright Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license   GPL <http://www.gnu.org/licenses/>
  * @version   0.3
@@ -23,7 +23,7 @@
 require_once 'Zend/Controller/Plugin/Abstract.php';
 
 /**
- * ACL Plugin
+ * MVC Access Control Plugin
  * 
  * Handles enforcing ACL restrictions on your standard MVC application.  All
  * MVC resources in the ACL should be in the form of:
@@ -31,15 +31,29 @@ require_once 'Zend/Controller/Plugin/Abstract.php';
  * mvc
  *  - mvc:module (child of "mvc")
  *    - mvc:module.controller (child of "mvc:module")
- *      - mvc:module.controller.action (child of "mvc.module.controller")
+ *      - mvc:module.controller.action (child of "mvc:module.controller")
  *      
  * This allows for various levels of access controls on your MVC application.
  * For example, you can allow all access to "mvc:admin" to your staff, but disallow
  * access to "mvc:admin.users.delete" to everyone but administrators.
  * 
- * If a resource in your ACL does not exist the plugin will create it and all
- * non-existant parent resources.  If the resource DOES exists, the plugin will
- * not attempt to create parent resources.
+ * If you're using Galahad_Acl most MVC resources should be automatically generated
+ * for you--you just need to add and set permissions for the ones you actually
+ * use.
+ * 
+ * Please note that for granular permissions it is better to use the ACL
+ * implementation in Galahad_Model_Entity.  The MVC ACL implementation is best
+ * for broad permissions (like denying access to an entire module or controller).
+ * If your models are used in different ways (within multiple controllers, or both
+ * via the web and via an API/CLI) permissions within your domain logic will save
+ * you from duplicating the same permissions at different access points.
+ * 
+ * Please note that most of the benefits of the plugin are made possible by
+ * Galahad_Acl.  If you are using Zend_Acl you will have to manually generate all
+ * the appropriate resource chains yourself.
+ * 
+ * MVC access control is also useful for controlling permissions on MVC resources
+ * that may initiate costly logic within your domain before querying the ACL.
  * 
  * @category   Galahad
  * @package    Galahad_Controller
@@ -51,70 +65,17 @@ class Galahad_Controller_Plugin_Acl extends Zend_Controller_Plugin_Abstract
 	/** @var string */
 	private static $_role = 'guest';
 	
-	/** @var Zend_Acl */
+	/** @var Galahad_Acl */
 	private $_acl;
-	
-	private $_authRouteName = null;
-	private $_authRouteOptions = array(); // = array('controller' => 'account', 'action' => 'login');
-	private $_authUrl = null;
-	
-	/**
-	 * Set the current role
-	 * 
-	 * @param Zend_Acl_Role_Interface|string $role
-	 */
-	public static function setRole($role) {
-		if (is_string($role)) {
-			$role = new Zend_Acl_Role($role);
-		}
-		
-		if (!$role instanceof Zend_Acl_Role_Interface) {
-			throw new InvalidArgumentException('Galahad_Controller_Plugin_Acl::setRole() expects a string or an object that implements Zend_Acl_Role_Interface.');
-		}
-		
-		self::$_role = $role;
-	}
 	
 	/**
 	 * Constructor
 	 * 
 	 * @param Zend_Acl $acl
 	 */
-	public function __construct(Zend_Acl $acl, $role = null)
+	public function __construct(Galahad_Acl $acl)
 	{
 		$this->_acl = $acl;
-		if (null != $role) {
-			self::setRole($role);
-		}
-	}
-	
-	/**
-	 * Sets the URL to redirect to if authentication is required
-	 * 
-	 * If you set the redirect as a URL, ensure that your ACL doesn't
-	 * prevent access to that URL!
-	 *
-	 * @param string $url
-	 * @return Galahad_Controller_Plugin_Acl
-	 */
-	public function setAuthUrl($url)
-	{
-		$this->_authUrl = $url;
-		return $this;
-	}
-	
-	/**
-	 * Set the Route to redirect to if authentication is required
-	 *
-	 * @param array $urlOptions
-	 * @param string $name
-	 * @return Galahad_Controller_Plugin_Acl
-	 */
-	public function setAuthRoute(Array $urlOptions, $name = null)
-	{
-		$this->_authRouteOptions = $urlOptions;
-		$this->_authRouteName = $name;
-		return $this;
 	}
 	
 	/**
@@ -136,47 +97,12 @@ class Galahad_Controller_Plugin_Acl extends Zend_Controller_Plugin_Abstract
 		$action = $request->getActionName();
 		
 		$resourceName = "mvc:{$module}.{$controller}.{$action}";
-		$this->_ensureResource($resourceName);
+		if (!$this->_acl->has($resourceName)) {
+			$this->_acl->addResource($resourceName);
+		}
 		
 		if (!$this->_acl->isAllowed(self::$_role, $resourceName, 'view')) {
-			$this->redirect();
+			throw new Galahad_Acl_Exception('You are not authorized to access this action.');
 		}
-	}
-	
-	public function redirect()
-	{
-		$redirector = Zend_Controller_Action_HelperBroker::getStaticHelper('redirector');
-
-		if (!empty($this->_authRouteOptions) || null !== $this->_authRouteName) {
-			$redirector->gotoRoute($this->_authRouteOptions, $this->_authRouteName);
-		} else if (null !== $this->_authUrl) {
-			$redirector->gotoUrl($this->_authUrl);
-		} else {
-			throw new Exception('No redirect login provided');
-		}
-	}
-	
-	protected function _ensureResource($resourceName)
-	{
-		if (!$this->_acl->has($resourceName)) {
-			if (null != ($parentResourceName = $this->_getParentResourceName($resourceName))) {
-				$this->_ensureResource($parentResourceName);
-			}
-			$this->_acl->addResource($resourceName, $parentResourceName);
-		}
-	}
-	
-	protected function _getParentResourceName($resourceName)
-	{
-		if ('mvc' == $resourceName) {
-			return null;
-		}
-		
-		$resourceName = substr($resourceName, 0, strrpos($resourceName, '.'));
-		if ('' == $resourceName) {
-			$resourceName = 'mvc';
-		}
-		
-		return $resourceName;
 	}
 }
