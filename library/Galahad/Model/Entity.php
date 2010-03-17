@@ -35,6 +35,7 @@ require_once 'Zend/Filter/Word/SeparatorToSeparator.php';
  * @package    Galahad_Model
  * @copyright  Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
+ * @todo       Maybe add a _checkAcl() method that checks against the ACL for the current method
  */
 abstract class Galahad_Model_Entity
 	extends Galahad_Model
@@ -239,6 +240,7 @@ abstract class Galahad_Model_Entity
     	$this->_acl = $acl;
 		if (!$this->_acl->has($this->getResourceId())) {
 			$this->_acl->add($this);
+			// TODO: Use reflection to add all the methods?
 		}
 		$this->_initAcl($this->_acl);
     	return $this;
