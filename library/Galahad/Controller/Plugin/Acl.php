@@ -28,8 +28,8 @@ require_once 'Zend/Controller/Plugin/Abstract.php';
  * Handles enforcing ACL restrictions on your standard MVC application.  All
  * MVC resources in the ACL should be in the form of:
  * 
- * mvc
- *  - mvc:module (child of "mvc")
+ * mvc:
+ *  - mvc:module (child of "mvc:")
  *    - mvc:module.controller (child of "mvc:module")
  *      - mvc:module.controller.action (child of "mvc:module.controller")
  *      
@@ -116,7 +116,7 @@ class Galahad_Controller_Plugin_Acl extends Zend_Controller_Plugin_Abstract
 			$this->_acl->addResource($resourceName);
 		}
 		
-		if (!$this->_acl->isAllowed(self::$_role, $resourceName, 'view')) {
+		if (!$this->_acl->isAllowed($this->getRole(), $resourceName, 'dispatch')) {
 			throw new Galahad_Acl_Exception('You are not authorized to access this action.');
 		}
 	}
@@ -172,9 +172,9 @@ class Galahad_Controller_Plugin_Acl extends Zend_Controller_Plugin_Abstract
 			$auth = Zend_Auth::getInstance();
             if ($auth->hasIdentity()) {
 				$this->setRole($auth->getIdentity());
+            } else {
+            	$this->setRole(self::getDefaultRole());
             }
-            
-            $this->setRole(self::getDefaultRole());
         }
 
         return $this->_role;
