@@ -62,7 +62,7 @@ This is particularly useful when used with either Galahad_Model_Entity or Galaha
 
     	public function save()
     	{
-    		if (!$this->getAcl()->isAllowed('model:default.post.save')) {
+    		if (!$this->getAcl()->isAllowed($this->getRole(), 'model:default.post.save')) {
     			throw new Exception('Current user is not allowed to save posts');
     		}
 
