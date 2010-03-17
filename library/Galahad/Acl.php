@@ -93,6 +93,25 @@ class Galahad_Acl extends Zend_Acl
     	
     	return parent::addResource($resource, $parent);
     }
+    
+    /**
+     * Tries to extract the role id from various variables
+     * 
+     * @param mixed $role
+     * @return string|int|float|false
+     */
+	public static function extractRoleId($role)
+    {
+    	if (is_array($role) && isset($role['role'])) {
+    		return $role['role'];
+    	} elseif (is_scalar($role) && !is_bool($role)) {
+    		return $role;
+    	} elseif ($role instanceof Zend_Acl_Role_Interface) {
+    		return $role->getRoleId();
+    	}
+    	
+    	return false;
+    }
 	
 	/**
 	 * Determines the parent resource name for an ACL resource

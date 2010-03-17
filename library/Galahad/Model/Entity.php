@@ -68,14 +68,14 @@ abstract class Galahad_Model_Entity
     protected $_resourceId = null;
     
     /**
-     * Default identity string to use for ACL
+     * Default role to use for ACL
      * 
      * @var string
      */
     protected static $_defaultRole = 'guest';
     
     /**
-     * Identity of user accessing this model
+     * Role of user accessing this model
      * 
      * @var string
      */
@@ -328,7 +328,7 @@ abstract class Galahad_Model_Entity
      */
     public static function setDefaultRole($role)
     {
-    	if (!$role = self::_extractRole($role)) {
+    	if (!$role = Galahad_Acl::extractRoleId($role)) {
     		throw new InvalidArgumentException('Invalid default role'); // TODO: Custom Exception
     	}
     	
@@ -353,7 +353,7 @@ abstract class Galahad_Model_Entity
     public function setRole($role)
     {
     	// TODO: Should this just throw an exception?
-    	if (!$role = self::_extractRole($role)) {
+    	if (!$role = Galahad_Acl::extractRoleId($role)) {
 			$role = self::getDefaultRole();
     	}
     	
@@ -377,25 +377,6 @@ abstract class Galahad_Model_Entity
         }
 
         return $this->_role;
-    }
-    
-	/**
-     * Determine if a passed role is valid
-     * 
-     * @link http://weierophinney.net/matthew/archives/201-Applying-ACLs-to-Models.html
-     * @param mixed $role
-     */
-    private static function _extractRole($role)
-    {
-    	if (is_array($role) && isset($role['role'])) {
-    		return $role['role'];
-    	} elseif (is_scalar($role) && !is_bool($role)) {
-    		return $role;
-    	} elseif ($role instanceof Zend_Acl_Role_Interface) {
-    		return $role;
-    	}
-    	
-    	return false;
     }
     
     /**

@@ -62,18 +62,33 @@ require_once 'Zend/Controller/Plugin/Abstract.php';
  */
 class Galahad_Controller_Plugin_Acl extends Zend_Controller_Plugin_Abstract
 {
-	/** @var string */
-	private static $_role = 'guest';
-	
-	/** @var Galahad_Acl */
+	/**
+	 * ACL
+	 *  
+	 * @var Zend_Acl
+	 */
 	private $_acl;
+	
+	/**
+     * Default role to use for ACL
+     * 
+     * @var string
+     */
+    protected static $_defaultRole = 'guest';
+    
+    /**
+     * Role of user to query ACL for
+     * 
+     * @var string
+     */
+    protected $_role = null;
 	
 	/**
 	 * Constructor
 	 * 
 	 * @param Zend_Acl $acl
 	 */
-	public function __construct(Galahad_Acl $acl)
+	public function __construct(Zend_Acl $acl)
 	{
 		$this->_acl = $acl;
 	}
@@ -105,4 +120,63 @@ class Galahad_Controller_Plugin_Acl extends Zend_Controller_Plugin_Abstract
 			throw new Galahad_Acl_Exception('You are not authorized to access this action.');
 		}
 	}
+	
+	/**
+     * Set the default role for all Entities
+     * By default this is "guest"
+     * 
+     * @param mixed $role
+     */
+    public static function setDefaultRole($role)
+    {
+    	if (!$role = Galahad_Acl::extractRoleId($role)) {
+    		throw new InvalidArgumentException('Invalid default role');
+    	}
+    	
+    	self::$_defaultRole = $role;
+    }
+    
+    /**
+     * Get the current default role
+     * 
+     * @return mixed
+     */
+    public static function getDefaultRole()
+    {
+    	return self::$_defaultRole;
+    }
+    
+    /**
+     * Set the accessing user's role
+     * 
+     * @param mixed $role
+     */
+    public function setRole($role)
+    {
+    	// TODO: Should this just throw an exception?
+    	if (!$role = Galahad_Acl::extractRoleId($role)) {
+			$role = self::getDefaultRole();
+    	}
+    	
+    	$this->_role = $role;
+    }
+    
+    /**
+     * Get the accessing user's role (and lazy load if necessary)
+     * 
+     * @return mixed
+     */
+    public function getRole()
+    {
+		if (null === $this->_role) {
+			$auth = Zend_Auth::getInstance();
+            if ($auth->hasIdentity()) {
+				$this->setRole($auth->getIdentity());
+            }
+            
+            $this->setRole(self::getDefaultRole());
+        }
+
+        return $this->_role;
+    }
 }
