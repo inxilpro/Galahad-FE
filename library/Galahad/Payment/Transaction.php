@@ -22,6 +22,7 @@
 /**
  * Payment Transaction
  * 
+ * @todo       Add constructor
  * @category   Galahad
  * @package    Galahad_Payment
  * @copyright  Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
