@@ -35,8 +35,8 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 	 * @var array
 	 */
 	protected static $_features = array(
-		Galahad_Payment::FEATURE_PRIOR_AUTHORIZATION => true,
 		Galahad_Payment::FEATURE_PROCESS => true,
+		Galahad_Payment::FEATURE_PRIOR_AUTHORIZATION => true,
 		// TODO: Refund and Void transactions
 	);
 	
@@ -138,9 +138,9 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 	 */
 	public function authorize(Galahad_Gateway_Transaction $transaction)
 	{
-		$params = $this->_buildTransactionParamters($transaction);
-		$params['x_type'] = 'AUTH_ONLY';
-		return $this->sendAdapterRequest($params);
+		$parameters = $this->_extractTransactionParameters($transaction);
+		$parameters['x_type'] = 'AUTH_ONLY';
+		return $this->sendAdapterRequest($parameters);
 	}
 	
 	/**
@@ -153,9 +153,9 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
      */
 	public function process(Galahad_Payment_Transaction $transaction) 
 	{
-		$params = $this->_buildTransactionParamters($transaction);
-		$params['x_type'] = 'AUTH_CAPTURE';		
-		return $this->sendAdapterRequest($params);
+		$parameters = $this->_extractTransactionParameters($transaction);
+		$parameters['x_type'] = 'AUTH_CAPTURE';		
+		return $this->sendAdapterRequest($parameters);
 	}
 	
 	/**
@@ -167,7 +167,7 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 	 */
 	public function capture(Galahad_Gateway_Transaction $transaction)
 	{
-		$params = $this->_buildTransactionParamters($transaction);
+		$parameters = $this->_extractTransactionParameters($transaction);
 		
 		$transactionId = $transaction->getTransactionId();
 		if (empty($transactionId)) {
@@ -176,9 +176,9 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 			throw new Galahad_Payment_Adapter_Exception('You cannot capture transactions that have not yet been authorized.');
 		}
 		
-		$params['x_type'] = 'PRIOR_AUTH_CAPTURE';
-		$params['x_trans_id'] = $transactionId;		
-		return $this->sendAdapterRequest($params);
+		$parameters['x_type'] = 'PRIOR_AUTH_CAPTURE';
+		$parameters['x_trans_id'] = $transactionId;
+		return $this->sendAdapterRequest($parameters);
 	}
 	
 	/**
@@ -189,28 +189,15 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 	 */
 	public function sendAdapterRequest(array $parameters = array())
 	{
-		// Determine URL
-		if ($this->_apiType == self::API_TYPE_TEST) {
-			$parameters['x_test_request'] = 'TRUE';
-		}
-		
-		// Login
-		$parameters['x_login'] = $this->_apiLoginId;
-		$parameters['x_tran_key'] = $this->_apiTransactionKey;
-		
 		// Build Fields
-		$fields = '';
-		$parameters = array_merge($this->_defaultParameters, $parameters);
-		foreach ($parameters as $key => $value) {
-			$fields .= "{$key}=" . urlencode($value) . '&';
-		}
+		$fields = http_build_query($parameters);
 		
 		// Init cURL
 		// TODO: Error check	
 		$ch = curl_init($this->_apiUrl);
 		curl_setopt($ch, CURLOPT_HEADER, false);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, rtrim($fields, '& '));
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // TODO: Optional
 		
 		// Call API
@@ -222,71 +209,121 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 		return new Galahad_Payment_Adapter_Response_AuthorizeNet($data, $parameters);
 	}
 	
-	protected function _buildTransactionParamters(Galahad_Gateway_Transaction $transaction)
+	/**
+	 * Build transaction parameters
+	 * 
+	 * @param Galahad_Payment_Transaction $transaction
+	 * @param array $customParamters
+	 * @return array
+	 */
+	protected function _buildParameters(Galahad_Payment_Transaction $transaction, array $customParamters = array())
 	{
-		$params = array();
+		$parameters = array_merge($this->_defaultParameters, $customParamters);
 		
-		// Amount
-		$this->_setOptionalParameter($params, 'amount', $transaction->getAmount());
-		
-		// Card
-		// TODO: Use setOptionalParameter?
-		$creditCard = $transaction->getCreditCard();
-		if (false !== $creditCard) {
-			$params['x_card_num'] = $creditCard->getNumber();
-			$params['x_exp_date'] = $creditCard->getExpirationDate('mY');
-			
-			if (false !== $creditCard->getCode()) {
-				$params['x_card_code'] = $creditCard->getCode();
-			}
+		// Enable test mode if necessary
+		if (self::MODE_TEST == $this->getMode()) {
+			$parameters['x_test_request'] = 'TRUE';
 		}
 		
-		// Invoice & Description
-		$this->_setOptionalParameter($params, 'invoice_num', $transaction->getInvoiceNumber());
-		$this->_setOptionalParameter($params, 'description', $transaction->getDescription());
+		// Add API credentials
+		$parameters['x_login'] = $this->_apiLoginId;
+		$parameters['x_tran_key'] = $this->_apiTransactionKey;
 		
-		// Customer Information
-		$this->_setOptionalParameter($params, 'first_name', $transaction->getCustomerFirstName());
-		$this->_setOptionalParameter($params, 'last_name', $transaction->getCustomerLastName());
-		$this->_setOptionalParameter($params, 'company', $transaction->getCustomerCompany());
-		$this->_setOptionalParameter($params, 'address', $transaction->getCustomerAddress());
-		$this->_setOptionalParameter($params, 'city', $transaction->getCustomerCity());
-		$this->_setOptionalParameter($params, 'state', $transaction->getCustomerState());
-		$this->_setOptionalParameter($params, 'zip', $transaction->getCustomerPostal());
-		$this->_setOptionalParameter($params, 'country', $transaction->getCustomerCountry());
-		$this->_setOptionalParameter($params, 'phone', $transaction->getCustomerPhone());
-		$this->_setOptionalParameter($params, 'fax', $transaction->getCustomerFax());
-		$this->_setOptionalParameter($params, 'email', $transaction->getCustomerEmail());
-		$this->_setOptionalParameter($params, 'cust_id', $transaction->getCustomerId());
-		$this->_setOptionalParameter($params, 'cust_ip', $transaction->getCustomerIpAddress());
+		// Build parameters depending on the API function
+		if ($parameters['x_type'] != 'PRIOR_AUTH_CAPTURE') {
+			$paramters = $this->_buildAuthorizeParameters($transaction, $paramters);
+		}
 		
-		// Mailing Information
-		$this->_setOptionalParameter($params, 'ship_to_first_name', $transaction->getMailingFirstName());
-		$this->_setOptionalParameter($params, 'ship_to_last_name', $transaction->getMailingLastName());
-		$this->_setOptionalParameter($params, 'ship_to_company', $transaction->getMailingCompany());
-		$this->_setOptionalParameter($params, 'ship_to_address', $transaction->getMailingAddress());
-		$this->_setOptionalParameter($params, 'ship_to_city', $transaction->getMailingCity());
-		$this->_setOptionalParameter($params, 'ship_to_state', $transaction->getMailingState());
-		$this->_setOptionalParameter($params, 'ship_to_zip', $transaction->getMailingPostal());
-		$this->_setOptionalParameter($params, 'ship_to_country', $transaction->getMailingCountry());
-		
-		return $params;
+		return $paramters;
 	}
 	
 	/**
-	 * Helper function to build $params arrays
+	 * Build transaction parameters for "process" or "authorize" transactions
+	 * 
+	 * @param Galahad_Payment_Transaction $transaction
+	 * @param array $paramters
+	 * @return array
+	 */
+	protected function _buildAuthorizeParameters(Galahad_Payment_Transaction $transaction, array $paramters)
+	{
+		// Amount
+		$amount = $transaction->getAmount();
+		$parameters['x_amount'] = $amount;
+		
+		// Payment Method
+		$method = $transaction->getPaymentMethod();
+		if ($method instanceof Galahad_Payment_Method_CreditCard) {
+			$parameters['x_card_num'] = $method->getNumber();
+			$parameters['x_exp_date'] = $method->getExpirationDate('mY');
+			if (null !== ($code = $method->getCode())) {
+				$parameters['x_card_code'] = $code;
+			}
+		} else {
+			/** @see Galahad_Payment_Adapter_Exception */
+			require_once 'Galahad/Payment/Adapter/Exception.php';
+			throw new Galahad_Payment_Adapter_Exception('Only credit card payments are supported at this time.');
+		}
+		
+		// Invoice & Description
+		$this->_setOptionalParameter($parameters, 'x_invoice_num', $transaction->getInvoiceNumber());
+		$this->_setOptionalParameter($parameters, 'x_description', $transaction->getComments());
+		
+		// Billing Customer Information
+		if ($billingCustomer = $transaction->getBillingCustomer()) {
+			$this->_setOptionalParameter($parameters, 'x_first_name', $billingCustomer->getFirstName());
+			$this->_setOptionalParameter($parameters, 'x_last_name', $billingCustomer->getLastName());
+			$this->_setOptionalParameter($parameters, 'x_company', $billingCustomer->getCompany());
+			
+			$address1 = $billingCustomer->getAddressLine1();
+			$address2 = $billingCustomer->getAddressLine2();
+			$address = $address1 . (empty($address2) ? '' : " {$address2}");
+			$this->_setOptionalParameter($parameters, 'x_address', $address);
+			
+			$this->_setOptionalParameter($parameters, 'x_city', $billingCustomer->getCity());
+			$this->_setOptionalParameter($parameters, 'x_state', $billingCustomer->getState());
+			$this->_setOptionalParameter($parameters, 'x_zip', $billingCustomer->getPostalCode());
+			$this->_setOptionalParameter($parameters, 'x_country', $billingCustomer->getCountry());
+			$this->_setOptionalParameter($parameters, 'x_phone', $billingCustomer->getPhoneNumber());
+			$this->_setOptionalParameter($parameters, 'x_fax', $billingCustomer->getFaxNumber());
+			$this->_setOptionalParameter($parameters, 'x_email', $billingCustomer->getEmail());
+			$this->_setOptionalParameter($parameters, 'x_cust_id', $billingCustomer->getCustomerId());
+			$this->_setOptionalParameter($parameters, 'x_cust_ip', $billingCustomer->getIpAddress());
+		}
+		
+		// Shipping Customer Information
+		if ($shippingCustomer = $transaction->getShippingCustomer()) {
+			$this->_setOptionalParameter($parameters, 'x_ship_to_first_name', $shippingCustomer->getFirstName());
+			$this->_setOptionalParameter($parameters, 'x_ship_to_last_name', $shippingCustomer->getLastName());
+			$this->_setOptionalParameter($parameters, 'x_ship_to_company', $shippingCustomer->getCompany());
+			
+			$address1 = $shippingCustomer->getAddressLine1();
+			$address2 = $shippingCustomer->getAddressLine2();
+			$address = $address1 . (empty($address2) ? '' : " {$address2}");
+			$this->_setOptionalParameter($parameters, 'x_ship_to_address', $address);
+			
+			$this->_setOptionalParameter($parameters, 'x_ship_to_city', $shippingCustomer->getCity());
+			$this->_setOptionalParameter($parameters, 'x_ship_to_state', $shippingCustomer->getState());
+			$this->_setOptionalParameter($parameters, 'x_ship_to_zip', $shippingCustomer->getPostalCode());
+			$this->_setOptionalParameter($parameters, 'x_ship_to_country', $shippingCustomer->getCountry());
+		}
+		
+		return $parameters;
+	}
+	
+	/**
+	 * Helper function to build $parameters arrays
 	 *
-	 * @param array $params
+	 * @param array $parameters
 	 * @param string $key
 	 * @param mixed $value
 	 * @return array
 	 */
-	protected function _setOptionalParameter(&$params, $key, $value)
+	protected function _setOptionalParameter(&$parameters, $key, $value)
 	{
-		if (false !== $value) {
-			$params['x_' . $key] = $value;
+		if (!empty($value)) {
+			$parameters[$key] = $value;
 		}
 		
-		return $params;
+		return $parameters;
 	}
 }
