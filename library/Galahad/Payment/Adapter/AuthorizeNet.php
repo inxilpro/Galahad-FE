@@ -71,7 +71,6 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 		'x_delim_char' => '|',
 		'x_delim_data' => 'TRUE',
 		'x_relay_response' => 'FALSE',
-		'x_method' => 'CC', // TODO: Support other methods
 	);
 	
 	/**
@@ -138,8 +137,8 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 	 */
 	public function authorize(Galahad_Gateway_Transaction $transaction)
 	{
-		$parameters = $this->_extractTransactionParameters($transaction);
-		$parameters['x_type'] = 'AUTH_ONLY';
+		$parameters = array('x_type' => 'AUTH_ONLY');
+		$parameters = $this->_buildParameters($transaction, $parameters);
 		return $this->sendAdapterRequest($parameters);
 	}
 	
@@ -153,8 +152,8 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
      */
 	public function process(Galahad_Payment_Transaction $transaction) 
 	{
-		$parameters = $this->_extractTransactionParameters($transaction);
-		$parameters['x_type'] = 'AUTH_CAPTURE';		
+		$parameters = array('x_type' => 'AUTH_CAPTURE');	
+		$parameters = $this->_buildParameters($transaction, $parameters);
 		return $this->sendAdapterRequest($parameters);
 	}
 	
@@ -167,8 +166,6 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 	 */
 	public function capture(Galahad_Gateway_Transaction $transaction)
 	{
-		$parameters = $this->_extractTransactionParameters($transaction);
-		
 		$transactionId = $transaction->getTransactionId();
 		if (empty($transactionId)) {
 			/** @see Galahad_Payment_Adapter_Exception */
@@ -176,8 +173,12 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 			throw new Galahad_Payment_Adapter_Exception('You cannot capture transactions that have not yet been authorized.');
 		}
 		
-		$parameters['x_type'] = 'PRIOR_AUTH_CAPTURE';
-		$parameters['x_trans_id'] = $transactionId;
+		$parameters = array(
+			'x_type' => 'PRIOR_AUTH_CAPTURE',
+			'x_trans_id' => $transactionId,
+		);
+		
+		$parameters = $this->_buildParameters($transaction, $parameters);
 		return $this->sendAdapterRequest($parameters);
 	}
 	
@@ -231,10 +232,10 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 		
 		// Build parameters depending on the API function
 		if ($parameters['x_type'] != 'PRIOR_AUTH_CAPTURE') {
-			$paramters = $this->_buildAuthorizeParameters($transaction, $paramters);
+			$parameters = $this->_buildAuthorizeParameters($transaction, $parameters);
 		}
 		
-		return $paramters;
+		return $parameters;
 	}
 	
 	/**
@@ -244,7 +245,7 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 	 * @param array $paramters
 	 * @return array
 	 */
-	protected function _buildAuthorizeParameters(Galahad_Payment_Transaction $transaction, array $paramters)
+	protected function _buildAuthorizeParameters(Galahad_Payment_Transaction $transaction, array $parameters)
 	{
 		// Amount
 		$amount = $transaction->getAmount();
@@ -253,6 +254,7 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 		// Payment Method
 		$method = $transaction->getPaymentMethod();
 		if ($method instanceof Galahad_Payment_Method_CreditCard) {
+			$parameters['x_method'] = 'CC';
 			$parameters['x_card_num'] = $method->getNumber();
 			$parameters['x_exp_date'] = $method->getExpirationDate('mY');
 			if (null !== ($code = $method->getCode())) {
