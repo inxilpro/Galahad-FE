@@ -20,7 +20,7 @@
  */
 
 /**
- * Payment Transaction
+ * Payment Method
  * 
  * @category   Galahad
  * @package    Galahad_Payment
@@ -29,5 +29,4 @@
  */
 abstract class Galahad_Payment_Method
 {
-	// FIXME
 }
