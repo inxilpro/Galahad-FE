@@ -65,13 +65,6 @@ class Galahad_Payment_Method_CreditCard extends Galahad_Payment_Method
 	protected $_code = null;
 	
 	/**
-	 * Card Type
-	 * 
-	 * @var string
-	 */
-	protected $_type = null;
-	
-	/**
 	 * Detailed errors
 	 * @var array
 	 */
@@ -129,7 +122,6 @@ class Galahad_Payment_Method_CreditCard extends Galahad_Payment_Method
 		$this->_number = $number;
 		$this->_expirationDate = $expiration;
 		$this->_code = $code;
-		$this->_type = $validator->getType();
 	}
 	
 	/**
