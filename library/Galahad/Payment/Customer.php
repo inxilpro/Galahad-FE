@@ -114,6 +114,46 @@ class Galahad_Payment_Customer implements Galahad_Payment_Customer_Interface
 	protected $_email;
 	
 	/**
+	 * Constructor
+	 * 
+	 * @param array|Zend_Config $data
+	 */
+	public function __construct($data = array())
+	{
+		$this->setData($data);
+	}
+	
+	/**
+     * Setup customer from array
+     * 
+     * @param array|Zend_Config $options
+     */
+    public function setData($data)
+    {
+    	if (!is_array($data)) {
+            if ($data instanceof Zend_Config) {
+                $data = $data->toArray();
+            } else {
+                /** @see Galahad_Payment_Adapter_Exception */
+                require_once 'Galahad/Payment/Adapter/Exception.php';
+                throw new Galahad_Payment_Customer_Exception('Customer data must be an array or a Zend_Config object.');
+            }
+        }
+        
+    	foreach ($data as $key => $value) {
+            $normalized = ucfirst($key);
+            if ('Options' == $normalized) {
+                continue;
+            }
+
+            $method = 'set' . $normalized;
+            if (method_exists($this, $method)) {
+                $this->$method($value);
+            }
+        }
+    }
+	
+	/**
 	 * Set the customer's ID
 	 * 
 	 * @param string $customerId
