@@ -15,6 +15,7 @@ Galahad FE has the following packages:
  - Galahad_Form
  - Galahad_Model
  - Galahad_Paginator
+ - Galahad_Payment
  - Galahad_Tool
  - Galahad_View
 
@@ -101,6 +102,38 @@ Provides basic functionality to facilitate modeling.  This includes entities & c
 ### Galahad_Paginator
 
 Adds a new paginator for Galahad_Models.
+
+### Galahad_Payment
+
+Gateway-independent payment processing.  Example code:
+
+    <?php
+    $options = array(
+    	'loginId' => 'Authorize.net Login ID',
+    	'transactionKey' => 'Authorize.net Transaction Key',
+    	'mode' => 'test'
+    );
+    $gateway = Galahad_Payment::factory('AuthorizeNet', $options);
+    
+    $customer = new Galahad_Payment_Customer(array(
+    	'firstName' => 'John',
+    	'lastName' => 'Smith',
+    	'postalCode' => '19106',
+    ));
+    
+    $card = new Galahad_Payment_Method_CreditCard('4111111111111111', 11, 2012);
+    
+    $transaction = new Galahad_Payment_Transaction();
+    $transaction->setBillingCustomer($customer);
+    $transaction->setPaymentMethod($card);
+    $transaction->setAmount(3.50);
+    $transaction->setComments("I need about three-fiddy.");
+    
+    $response = $gateway->process($transaction);
+    if ($response->isApproved()) {
+    	echo "Your transaction was approved!";
+    }
+    ?>
 
 ### Galahad_Tool
 
