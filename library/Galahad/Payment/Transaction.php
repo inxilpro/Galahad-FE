@@ -29,10 +29,286 @@
  */
 class Galahad_Payment_Transaction
 {
-	// FIXME
+	/**
+	 * The transaction ID
+	 * 
+	 * This is in whatever format the gateway sends transaction IDs
+	 * 
+	 * @var string
+	 */
+	protected $_transactionId = null;
 	
+	/**
+	 * Transaction Amount
+	 * @var float
+	 */
+	protected $_amount = 0.00;
+	
+	/**
+	 * Transaction invoice number
+	 * @var mixed
+	 */
+	protected $_invoiceNumber;
+	
+	/**
+	 * Transaction comments or description
+	 * @var string
+	 */
+	protected $_comments;
+	
+	/**
+	 * Payment Method
+	 * @var Galahad_Payment_Method
+	 */
+	protected $_paymentMethod;
+	
+	/**
+	 * Billing Customer
+	 * @var Galahad_Payment_Customer_Interface
+	 */
+	protected $_billingCustomer;
+	
+	/**
+	 * Shipping Customer
+	 * @var Galahad_Payment_Customer_Interface
+	 */
+	protected $_shippingCustomer;
+	
+	/**
+	 * Application-specific properties
+	 * 
+	 * These are transaction properties that either aren't available
+	 * in all gateways or are for application-use only.
+	 * 
+	 * @var array
+	 */
+	protected $_properties = array();
+	
+	/**
+	 * Set the transaction ID
+	 * 
+	 * @param mixed $transactionId
+	 */
+	public function setTransactionId($transactionId)
+	{
+		$this->_transactionId = (string) $transactionId;
+		return $this;
+	}
+	
+	/**
+	 * Get the transaction ID
+	 * 
+	 * @return string
+	 */
 	public function getTransactionId()
 	{
+		return $this->_transactionId;
+	}
+	
+	/**
+	 * Sets the transaction amount
+	 * 
+	 * @param int|float $amount
+	 * @return Galahad_Payment_Transaction
+	 */
+	public function setAmount($amount)
+	{
+		if (!is_int($amount) && !is_float($amount)) {
+			/** @see Galahad_Payment_Transaction_Exception */
+			require_once 'Galahad/Payment/Transaction/Exception.php';
+			throw new Galahad_Payment_Transaction_Exception('Transaction amount must be an integer or a float.');
+		}
 		
+		$this->_amount = (float) $amount;
+		return $this;
+	}
+	
+	/**
+	 * Get the transaction amount
+	 * 
+	 * @return float
+	 */
+	public function getAmount()
+	{
+		return $this->_amount;
+	}
+	
+	/**
+	 * Set the transaction invoice number
+	 * 
+	 * @param mixed $invoiceNumber
+	 */
+	public function setInvoiceNumber($invoiceNumber)
+	{
+		$this->_invoiceNumber = (string) $invoiceNumber;
+		return $this;
+	}
+	
+	/**
+	 * Get the transaction invoice number
+	 * 
+	 * @return string
+	 */
+	public function getInvoiceNumber()
+	{
+		return $this->_invoiceNumber;
+	}
+	
+	/**
+	 * Set the transaction comments
+	 * 
+	 * @param mixed $comments
+	 */
+	public function setComments($comments)
+	{
+		$this->_comments = (string) $comments;
+		return $this;
+	}
+	
+	/**
+	 * Get the transaction comments
+	 * 
+	 * @return string
+	 */
+	public function getComments()
+	{
+		return $this->_comments;
+	}
+	
+	/**
+	 * Set the transaction's payment method (credit card, e-check, etc)
+	 * 
+	 * @param Galahad_Payment_Method $method
+	 * @return Galahad_Payment_Transaction
+	 */
+	public function setPaymentMethod(Galahad_Payment_Method $method)
+	{
+		$this->_paymentMethod = $method;
+		return $this;
+	}
+	
+	/**
+	 * Get the transaction's payment method
+	 * 
+	 * @return Galahad_Payment_Method
+	 */
+	public function getPaymentMethod()
+	{
+		return $this->_paymentMethod;
+	}
+	
+	/**
+	 * Set the transaction's billing customer (who gets billed)
+	 * 
+	 * @param Galahad_Payment_Customer_Interface $customer
+	 * @return Galahad_Payment_Transaction
+	 */
+	public function setBillingCustomer(Galahad_Payment_Customer_Interface $customer)
+	{
+		$this->_billingCustomer = $customer;
+		return $this;
+	}
+	
+	/**
+	 * Get the transaction's billing customer (who gets billed)
+	 * 
+	 * @return Galahad_Payment_Customer_Interface
+	 */
+	public function getBillingCustomer()
+	{
+		return $this->_billingCustomer;
+	}
+	
+	/**
+	 * Set the transaction's shipping customer (who receives items ordered)
+	 * 
+	 * @param Galahad_Payment_Customer_Interface $customer
+	 * @return Galahad_Payment_Transaction
+	 */
+	public function setShippingCustomer(Galahad_Payment_Customer_Interface $customer)
+	{
+		$this->_shippingCustomer = $customer;
+		return $this;
+	}
+	
+	/**
+	 * Get the transaction's shipping customer (who receives items ordered)
+	 * 
+	 * @return Galahad_Payment_Customer_Interface
+	 */
+	public function getShippingCustomer()
+	{
+		return $this->_shippingCustomer;
+	}
+	
+	/**
+	 * Captures all setters and getters and stores them as transaction properties
+	 * 
+	 * @param string $name
+	 * @param array $arguments
+	 */
+	public function __call($name, $arguments)
+	{
+		if (preg_match('/^(set|get)([A-Z])(\w+)$/', $name, $matches)) {
+			$action = $matches[1];
+			$propertyName = strtolower($matches[2]) . $matches[3];
+			
+			if ('set' == $action) {
+				$this->_properties[$propertyName] = $arguments[0];
+				return $this;
+			} else {
+				if (!isset($this->_properties[$propertyName])) {
+					return null;
+				}
+				return $this->_properties[$propertyName];
+			}
+		}
+		
+		/** @see Galahad_Payment_Transaction_Exception */
+		require_once 'Galahad/Payment/Transaction/Exception.php';
+		throw new Galahad_Payment_Transaction_Exception("'{$name}' is not a valid transaction method.");
+	}
+	
+	/**
+	 * Set all undeclared properties as transaction properties
+	 *  
+	 * @param string $name
+	 * @param mixed $value
+	 */
+	public function __set($name, $value)
+	{
+		$this->_properties[$name] = $value;
+	}
+	
+	/**
+	 * Get all undeclared properties as transaction properties
+	 * 
+	 * @param string $name
+	 * @return mixex
+	 */
+	public function __get($name)
+	{
+		if (!isset($this->_properties[$name])) {
+			return null;
+		}
+		return $this->_properties[$name];
+	}
+	
+	/**
+	 * Overload isset
+	 * @param string $name
+	 */
+	public function __isset($name)
+	{
+		return isset($this->_properties[$name]);
+	}
+	
+	/**
+	 * Overload unset
+	 * @param string $name
+	 */
+	public function __unset($name)
+	{
+		unset($this->_properties[$name]);
 	}
 }
