@@ -22,6 +22,9 @@
 /**
  * Payment Method
  * 
+ * Each payment method is completely different.  This just provides
+ * a common ancestor for all of them.
+ * 
  * @category   Galahad
  * @package    Galahad_Payment
  * @copyright  Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
