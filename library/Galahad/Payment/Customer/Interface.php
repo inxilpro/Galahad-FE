@@ -31,5 +31,101 @@
  */
 interface Galahad_Payment_Customer_Interface
 {
-	// FIXME
+	/**
+	 * Get the customer's ID
+	 * 
+	 * @return string
+	 */
+	public function getCustomerId();
+	
+	/**
+	 * Get the customer's IP address
+	 * 
+	 * @return string
+	 */
+	public function getIpAddress();
+	
+	/**
+	 * Get the customer's first name
+	 * 
+	 * @return string
+	 */
+	public function getFirstName();
+	
+	/**
+	 * Get the customer's last name
+	 * 
+	 * @return string
+	 */
+	public function getLastName();
+	
+	/**
+	 * Get the customer's company
+	 * 
+	 * @return string
+	 */
+	public function getCompany();
+	
+	/**
+	 * Get the customer's address line 1
+	 * 
+	 * @return string
+	 */
+	public function getAddressLine1();
+	
+	/**
+	 * Get the customer's address line 2
+	 * 
+	 * @return string
+	 */
+	public function getAddressLine2();
+	
+	/**
+	 * Get the customer's city
+	 * 
+	 * @return string
+	 */
+	public function getCity();
+	
+	/**
+	 * Get the customer's state
+	 * 
+	 * @return string
+	 */
+	public function getState();
+	
+	/**
+	 * Get the customer's postal code
+	 * 
+	 * @return string
+	 */
+	public function getPostalCode();
+	
+	/**
+	 * Get the customer's country
+	 * 
+	 * @return string
+	 */
+	public function getCountry();
+	
+	/**
+	 * Get the customer's phone number
+	 * 
+	 * @return string
+	 */
+	public function getPhoneNumber();
+	
+	/**
+	 * Get the customer's fax number
+	 * 
+	 * @return string
+	 */
+	public function getFaxNumber();
+	
+	/**
+	 * Get the customer's email
+	 * 
+	 * @return string
+	 */
+	public function getEmail();
 }
