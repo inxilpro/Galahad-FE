@@ -101,19 +101,18 @@ class Galahad_Payment_Method_CreditCard extends Galahad_Payment_Method
 		if ($expirationMonth < 1 || $expirationMonth > 12) {
 			/** @see Galahad_CreditCard_Exception */
 			require_once 'Galahad/Payment/Method/CreditCard/Exception.php';
-			throw new Galahad_CreditCard_Exception("'{$expirationMonth}' is an invalid month.");
+			throw new Galahad_Payment_Method_CreditCard_Exception("'{$expirationMonth}' is an invalid month.");
 		}
 		
 		// Generate DateTime object and validate expiration
 		$expirationYear = (int) $expirationYear;
 		$expiration = new DateTime("{$expirationYear}-{$expirationMonth}-1");
-		$expiration = new DateTime('2009-3-1');
 		$expiration->modify('+1 month -1 second');
 		
 		if ($expiration < new DateTime()) {
 			/** @see Galahad_CreditCard_Exception */
 			require_once 'Galahad/Payment/Method/CreditCard/Exception.php';
-			throw new Galahad_CreditCard_Exception("Card has expired.");
+			throw new Galahad_Payment_Method_CreditCard_Exception("Card has expired.");
 		}
 		
 		// Validate Card
@@ -124,7 +123,7 @@ class Galahad_Payment_Method_CreditCard extends Galahad_Payment_Method
 			
 			/** @see Galahad_CreditCard_Exception */
 			require_once 'Galahad/Payment/Method/CreditCard/Exception.php';
-			throw new Galahad_CreditCard_Exception("Invalid credit card number.");
+			throw new Galahad_Payment_Method_CreditCard_Exception("Invalid credit card number.");
 		}
 		
 		$this->_number = $number;
