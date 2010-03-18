@@ -150,7 +150,7 @@ abstract class Galahad_Payment_Adapter_Abstract
      */
     public function setMode($mode)
     {
-    	if ($mode !== self::MODE_NORMAL || $mode !== self::MODE_TEST) {
+    	if ($mode !== self::MODE_NORMAL && $mode !== self::MODE_TEST) {
     		/** @see Galahad_Payment_Adapter_Exception */
     		require_once 'Galahad/Payment/Adapter/Exception.php';
     		throw new Galahad_Payment_Adapter_Exception('Invalid payment mode.');
