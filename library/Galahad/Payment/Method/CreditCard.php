@@ -20,6 +20,11 @@
  */
 
 /**
+ * @see Zend_Validate_CreditCard 
+ */
+require_once 'Zend/Validate/CreditCard.php';
+
+/**
  * Credit Card Payment Method
  * 
  * @category   Galahad
@@ -28,89 +33,138 @@
  * @license    GPL <http://www.gnu.org/licenses/>
  */
 class Galahad_Payment_Method_CreditCard extends Galahad_Payment_Method
-{
-	const TYPE_MASTERCARD 	= 'MasterCard';
-	const TYPE_VISA 		= 'Visa';
-	const TYPE_AMEX 		= 'American Express';
-	const TYPE_DINERSCLUB 	= 'Diners Club';
-	const TYPE_DISCOVER 	= 'Discover';
-	const TYPE_ENROUTE 		= 'Enroute';
-	const TYPE_JCB 			= 'JCB';
-	
-	private static $_acceptedTypes = array(
-		self::TYPE_VISA,
-		self::TYPE_MASTERCARD,
-		self::TYPE_DISCOVER,
-		self::TYPE_AMEX,
+{	
+	/**
+	 * Credit card types to accept
+	 * @var array
+	 */
+	protected static $_acceptedTypes = array(
+		Zend_Validate_CreditCard::ALL,
 	);
 	
-	private $_number = null;
-	private $_expireMonth = 0;
-	private $_expireYear = 0;
-	private $_code = null;
-	private $_type = null;
+	/**
+	 * Credit Card Number
+	 * @var string
+	 */
+	protected $_number = null;
 	
-	public function __construct($number, $expireMonth, $expireYear, $code = null, Array $accepted = array())
+	/**
+	 * Expiration Date
+	 * @var DateTime
+	 */
+	protected $_expirationDate;
+	
+	/**
+	 * Card Security Code (CSC)
+	 * 
+	 * AKA Card Verification Value (CVV or CV2), Card Verification Value Code (CVVC), 
+	 * Card Verification Code (CVC), Verification Code (V-Code or V Code), or Card Code Verification (CCV)
+	 * 
+	 * @var string
+	 */
+	protected $_code = null;
+	
+	/**
+	 * Card Type
+	 * 
+	 * @var string
+	 */
+	protected $_type = null;
+	
+	/**
+	 * Detailed errors
+	 * @var array
+	 */
+	protected $_errors = array();
+	
+	/**
+	 * Constructor 
+	 * 
+	 * @param string $number The Credit Card Number
+	 * @param int $expireMonth Expiration Month
+	 * @param int $expireYear Expiration Year
+	 * @param string $code Card Security Code
+	 * @param array $accepted Accepted Card Types (for this instance) 
+	 */
+	public function __construct($number, $expirationMonth, $expirationYear, $code = null, Array $acceptedTypes = null)
 	{
 		// Accepted card types
-		if (empty($accepted)) {
-			$accepted = self::$_acceptedTypes;
+		if (null == $acceptedTypes) {
+			$acceptedTypes = self::$_acceptedTypes;
 		}
 		
-		// Clean data
+		// Clean up credit card number
 		$number = preg_replace('/\D/', '', $number);
-		$expireMonth = (int) $expireMonth;
-		$expireYear = (int) $expireYear;
-		if ($expireYear < 1000) {
-			$expireYear += 2000;
+		
+		// Clean up and validate expiration month
+		$expirationMonth = (int) $expirationMonth;
+		if ($expirationMonth < 1 || $expirationMonth > 12) {
+			/** @see Galahad_CreditCard_Exception */
+			require_once 'Galahad/Payment/Method/CreditCard/Exception.php';
+			throw new Galahad_CreditCard_Exception("'{$expirationMonth}' is an invalid month.");
 		}
 		
-		// Error check
-		if ($expireMonth < 1 || $expireMonth > 12) {
-			require_once 'Galahad/CreditCard/Exception.php';
-			throw new Galahad_CreditCard_Exception("<b>{$expireMonth}</b> is an invalid month.");
+		// Generate DateTime object and validate expiration
+		$expirationYear = (int) $expirationYear;
+		$expiration = new DateTime("{$expirationYear}-{$expirationMonth}-1");
+		$expiration = new DateTime('2009-3-1');
+		$expiration->modify('+1 month -1 second');
+		
+		if ($expiration < new DateTime()) {
+			/** @see Galahad_CreditCard_Exception */
+			require_once 'Galahad/Payment/Method/CreditCard/Exception.php';
+			throw new Galahad_CreditCard_Exception("Card has expired.");
 		}
 		
-		if ($expireYear < (int) date('Y') || ($expireYear == (int) date('Y') && $expireMonth < (int) date('n'))) {
-			require_once 'Galahad/CreditCard/ExpiredException.php';
-			throw new Galahad_CreditCard_ExpiredException();
-		}
-		
-		if (!self::checkMod10($number)) {
-			require_once 'Galahad/CreditCard/Mod10Exception.php';
-			throw new Galahad_CreditCard_Mod10Exception();
-		}
-		
-		$type = self::getCardType($number);
-		if (!in_array($type, $accepted)) {
-			require_once 'Galahad/CreditCard/CardTypeException.php';
-			throw new Galahad_CreditCard_CardTypeException("We do not accept <b>{$type}</b>");
+		// Validate Card
+		$validator = new Zend_Validate_CreditCard();
+		$validator->addType($acceptedTypes);
+		if (!$validator->isValid($number)) {
+			$this->_errors = $validator->getErrors();
+			
+			/** @see Galahad_CreditCard_Exception */
+			require_once 'Galahad/Payment/Method/CreditCard/Exception.php';
+			throw new Galahad_CreditCard_Exception("Invalid credit card number.");
 		}
 		
 		$this->_number = $number;
-		$this->_expireMonth = $expireMonth;
-		$this->_expireYear = $expireYear;
+		$this->_expirationDate = $expiration;
 		$this->_code = $code;
-		$this->_type = $type;	
+		$this->_type = $validator->getType();
 	}
 	
+	/**
+	 * Get Credit Card Number
+	 * 
+	 * @return string
+	 */
 	public function getNumber()
 	{
 		return $this->_number;
 	}
 	
-	public function getExpirationDate($format = 'mY')
+	/**
+	 * Get Expiration Date
+	 * 
+	 * @param string $format
+	 * @param bool $raw If true you will receive a raw DateTime object
+	 */
+	public function getExpirationDate($format = 'mY', $raw = false)
 	{
-		$date = gmmktime(0, 0, 0, $this->_expireMonth, 1, $this->_expireYear);
-		return gmdate($format, $date);
-	}
-	
-	public function getCode()
-	{
-		if (null == $this->_code) {
-			return false;
+		if (true === $raw) {
+			return $this->_expirationDate;
 		}
 		
+		return $this->_expirationDate->format($format);
+	}
+	
+	/**
+	 * Get Card Security Code
+	 * 
+	 * @return string|null
+	 */
+	public function getCode()
+	{
 		return $this->_code;
 	}
 	
@@ -127,74 +181,12 @@ class Galahad_Payment_Method_CreditCard extends Galahad_Payment_Method
 	}
 	
 	/**
-	 * Checks whether a credit card number passes the MOD 10 check
-	 *
-	 * @param string $number
-	 * @return bool
+	 * Get credit card validation errors
+	 * 
+	 * @return array
 	 */
-	public static function checkMod10($number)
+	public function getErrors()
 	{
-		$number = preg_replace('/\D/', '', $number);
-		$length = strlen($number);
-		$parity = $length % 2;
-		
-		if ($length < 13) {
-			return false;
-		}
-		
-		$sum = 0;
-		for ($i = 0; $i < $length; $i++) {
-			$digit = $number[$i];
-			if ($i % 2 == $parity) {
-				$digit = $digit * 2;
-			}
-			if ($digit > 9) {
-				$digit = $digit - 9;
-			}
-			$sum = $sum + $digit;
-		}
-		
-		$valid = ($sum % 10 == 0);
-		return $valid;
-	}
-	
-	/**
-	 * Gets the type of card based on its number
-	 *
-	 * @param string $number
-	 * @return string
-	 */
-	public static function getCardType($number)
-	{
-		$number = preg_replace('/\D/', '', $number);
-		$length = strlen($number);
-		if ($length < 13) {
-			return false;
-		}
-		
-		$d1 = intval(substr($number, 0, 1));
-		$d2 = intval(substr($number, 0, 2));
-		$d3 = intval(substr($number, 0, 3));
-		$d4 = intval(substr($number, 0, 4));
-		
-		if ($d2 >= 51 && $d2 <= 55) {
-			return self::TYPE_MASTERCARD;
-		} elseif ($d1 == 4) {
-			return self::TYPE_VISA;
-		} elseif ($d2 >= 34 && $d2 <= 37) {
-			return self::TYPE_AMEX;
-		} elseif ($d3 >= 300 && $d3 <= 305) {
-			return self::TYPE_DINERSCLUB;
-		} elseif ($d2 == 36 || $d2 == 38) {
-			return self::TYPE_DINERSCLUB;
-		} elseif ($d4 == 6011) {
-			return self::TYPE_DISCOVER;
-		} elseif ($d4 == 2014 || $d4 == 2149) {
-			return self::TYPE_ENROUTE;
-		} elseif ($d1 == 3 || $d4 == 2131 || $d4 == 1800) {
-			return self::TYPE_JCB;
-		}
-		
-		return false;
+		return $this->_errors;
 	}
 }
