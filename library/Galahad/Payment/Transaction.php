@@ -22,7 +22,6 @@
 /**
  * Payment Transaction
  * 
- * @todo       Add constructor
  * @category   Galahad
  * @package    Galahad_Payment
  * @copyright  Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
@@ -84,6 +83,48 @@ class Galahad_Payment_Transaction
 	 * @var array
 	 */
 	protected $_properties = array();
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param array|Zend_Config $data
+	 */
+	public function __construct($options = array())
+	{
+		$this->setOptions($options);
+	}
+	
+	/**
+     * Setup customer from array
+     * 
+     * @param array|Zend_Config $options
+     */
+    public function setOptions($options)
+    {
+    	if (!is_array($options)) {
+            if ($options instanceof Zend_Config) {
+                $options = $options->toArray();
+            } else {
+                /** @see Galahad_Payment_Transaction_Exception */
+                require_once 'Galahad/Payment/Transaction/Exception.php';
+                throw new Galahad_Payment_Transaction_Exception('Transaction options must be an array or a Zend_Config object.');
+            }
+        }
+        
+    	foreach ($options as $key => $value) {
+            $normalized = ucfirst($key);
+            if ('Options' == $normalized) {
+                continue;
+            }
+
+            $method = 'set' . $normalized;
+            if (method_exists($this, $method)) {
+                $this->$method($value);
+            }
+            
+            // TODO: throw exception on unknown option?
+        }
+    }
 	
 	/**
 	 * Set the transaction ID
