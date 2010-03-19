@@ -52,6 +52,7 @@ class Galahad_Payment
 	 * @see Zend_Db Borrows heavily from Zend_Db implementation
 	 * @param string $adapter
 	 * @param array|Zend_Config $config
+	 * @return Galahad_Payment_Adapter_Abstract
 	 */
     public static function factory($adapter, $config = array())
     {
