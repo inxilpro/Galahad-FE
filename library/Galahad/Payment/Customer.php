@@ -134,15 +134,15 @@ class Galahad_Payment_Customer implements Galahad_Payment_Customer_Interface
             if ($data instanceof Zend_Config) {
                 $data = $data->toArray();
             } else {
-                /** @see Galahad_Payment_Adapter_Exception */
-                require_once 'Galahad/Payment/Adapter/Exception.php';
+                /** @see Galahad_Payment_Customer_Exception */
+                require_once 'Galahad/Payment/Customer/Exception.php';
                 throw new Galahad_Payment_Customer_Exception('Customer data must be an array or a Zend_Config object.');
             }
         }
         
     	foreach ($data as $key => $value) {
             $normalized = ucfirst($key);
-            if ('Options' == $normalized) {
+            if ('Data' == $normalized) {
                 continue;
             }
 
