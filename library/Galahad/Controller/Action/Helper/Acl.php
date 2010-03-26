@@ -75,7 +75,6 @@ class Galahad_Controller_Action_Helper_Acl extends Zend_Controller_Action_Helper
 				$role = $identity;
 			}
 		}
-		// die(var_export($role, true));
 		
 		return $this->_acl->isAllowed($role, $resource, $privilege);
 	}
