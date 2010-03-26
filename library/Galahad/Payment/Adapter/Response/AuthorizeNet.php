@@ -351,7 +351,7 @@ class Galahad_Payment_Adapter_Response_AuthorizeNet extends Galahad_Payment_Adap
 		$data = explode('|', $data);
 		foreach ($data as $key => $value) {
 			$key++;
-			if ($value && isset($this->_responseFields[$key])) {
+			if (isset($this->_responseFields[$key])) {
 				$this->_data[$this->_responseFields[$key][0]] = $value;
 			}
 		}
@@ -454,6 +454,16 @@ class Galahad_Payment_Adapter_Response_AuthorizeNet extends Galahad_Payment_Adap
 	public function getAdapterCode()
 	{
 		return $this->getResponseCode();
+	}
+	
+	/**
+	 * Get the transaction ID
+	 *
+	 * @return string|int
+	 */
+	public function getResponseId()
+	{
+		return $this->_data['transactionId'];
 	}
 	
 	/**

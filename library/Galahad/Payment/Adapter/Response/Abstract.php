@@ -131,4 +131,19 @@ abstract class Galahad_Payment_Adapter_Response_Abstract
 	{
 		return null;
 	}
+	
+	/**
+	 * Get the response/transaction ID
+	 * 
+	 * A unique ID that identifies the transaction at the gateway.
+	 * 
+	 * Implementing this method is optional
+	 * 
+	 * @todo This may become required, and may be renamed
+	 * @return string|int
+	 */
+	public function getResponseId()
+	{
+		return null;
+	}
 }
