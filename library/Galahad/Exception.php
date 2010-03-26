@@ -19,6 +19,9 @@
  * @version   0.3
  */
 
+/** @see Zend_Exception */
+require_once 'Zend/Exception.php';
+
 /**
  * @category   Galahad
  * @package    Galahad_Exception
