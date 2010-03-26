@@ -253,6 +253,22 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	{
 		return $this->_constraintClass;
 	}
+	
+	protected function _convertModelToId(array &$data, $indexFrom, $indexTo, $className, $method = 'getId')
+	{
+		if (isset($data[$indexFrom])) {
+	        if ($data[$indexFrom] instanceof $className) {
+	    		$data[$indexTo] = $data[$indexFrom]->{$method}();
+	    	} elseif (is_int($data[$indexFrom])) {
+	    		$data[$indexTo] = $data[$indexFrom];
+	    	} else {
+	    		$data[$indexTo] = null;
+	    	}
+	    	unset($data[$indexFrom]);
+        }
+        
+        return $data;
+	}
 }
 
 
