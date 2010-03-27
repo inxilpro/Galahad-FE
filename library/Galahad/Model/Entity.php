@@ -91,6 +91,9 @@ abstract class Galahad_Model_Entity
         if (null !== $data) {
             $this->reset($data);
         }
+        
+        // TODO: is there a way to do this only if ACL is needed?
+        $this->getAcl()->addResource($this);
     }
     
     /**
