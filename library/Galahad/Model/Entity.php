@@ -93,7 +93,10 @@ abstract class Galahad_Model_Entity
         }
         
         // TODO: is there a way to do this only if ACL is needed?
-        $this->getAcl()->addResource($this);
+        $acl = $this->getAcl();
+        if (!$acl->has($this)) {
+        	$acl->addResource($this);
+        }
     }
     
     /**
