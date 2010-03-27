@@ -3,4 +3,5 @@
 	<buildpathentry kind="con" path="org.eclipse.php.core.LANGUAGE"/>
 	<buildpathentry kind="con" path="org.eclipse.dltk.USER_LIBRARY/Zend Framework (system current)"/>
 	<buildpathentry kind="src" path=""/>
+	<buildpathentry kind="con" path="org.eclipse.dltk.USER_LIBRARY/Zend Framework (Zend Server)"/>
 </buildpath>
