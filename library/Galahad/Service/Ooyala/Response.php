@@ -60,11 +60,25 @@ class Galahad_Service_Ooyala_Response
     protected $_errorMessage;
 
     /**
+     * Original request
+     *
+     * @var array
+     */
+    protected $_request = array();
+
+    /**
+     * The service that created this response
+     *
+     * @var Galahad_Service_Ooyala
+     */
+    protected $_service;
+
+    /**
      * Constructor
      *
      * @param string $responseData
      */
-    public function  __construct($responseData, $xml = true)
+    public function  __construct($responseData)
     {
 	if ($responseData instanceof Zend_Http_Response) {
 	    if (!$responseData->isSuccessful()) {
@@ -81,30 +95,39 @@ class Galahad_Service_Ooyala_Response
 	$this->_raw = trim($responseData);
 	unset($responseData);
 
-	if ($xml) {
-	    $this->_data = @simplexml_load_string($this->_raw);
+	$this->_status = $this->_process();
+    }
 
-	    if (!$this->_data instanceof SimpleXMLElement) {
-		$this->_status = false;
-		$this->_errorMessage = $this->_raw;
-		return;
-	    }
+    protected function _process()
+    {
+	return $this->_processXml();
+    }
 
-	    if ('result' == $this->_data->getName() && 'failure' == $this->_data['code']) {
-		$this->_status = false;
-		$this->_errorMessage = (string) $this->_data;
-		return;
-	    }
+    protected function _processXml()
+    {
+	$this->_data = @simplexml_load_string($this->_raw);
 
-	} else {
-	    if ("OK" !== $this->_raw) {
-		$this->_status = false;
-		$this->_errorMessage = $this->_raw;
-		return;
-	    }
+	if (!$this->_data instanceof SimpleXMLElement) {
+	    $this->_errorMessage = $this->_raw;
+	    return false;
 	}
 
-	$this->_status = true;
+	if ('result' == $this->_data->getName() && 'failure' == $this->_data['code']) {
+	    $this->_errorMessage = (string) $this->_data;
+	    return false;
+	}
+
+	return true;
+    }
+
+    protected function _processSimple()
+    {
+	if ("OK" !== $this->_raw) {
+	    $this->_errorMessage = $this->_raw;
+	    return false;
+	}
+
+	return true;
     }
 
     /**
@@ -148,6 +171,26 @@ class Galahad_Service_Ooyala_Response
     }
 
     /**
+     * Set the request data used to create this response
+     *
+     * @param array $request
+     */
+    public function setRequest(array $request)
+    {
+	$this->_request = $request;
+    }
+
+    /**
+     * Set the service used to create this response
+     *
+     * @param Galahad_Service_Ooyala $service
+     */
+    public function setService(Galahad_Service_Ooyala $service)
+    {
+	$this->_service = $service;
+    }
+
+    /**
      * Pass everything else to SimpleXMLElement
      *
      * @param string $name
@@ -173,7 +216,7 @@ class Galahad_Service_Ooyala_Response
     /**
      * @param string $message
      */
-    private function _throwException($message)
+    protected function _throwException($message)
     {
 	/** @see Galahad_Service_Ooyala_Exception */
 	require_once 'Galahad/Service/Ooyala/Exception.php';
