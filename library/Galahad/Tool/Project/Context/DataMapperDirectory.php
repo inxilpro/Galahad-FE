@@ -38,7 +38,7 @@ class Galahad_Tool_Project_Context_DataMapperDirectory extends Zend_Tool_Project
     /**
      * @var string
      */
-    protected $_filesystemName = 'DataMapper';
+    protected $_filesystemName = 'Mappers';
     
     /**
      * getName()

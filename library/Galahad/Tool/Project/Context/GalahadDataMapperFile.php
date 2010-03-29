@@ -116,7 +116,7 @@ class Galahad_Tool_Project_Context_GalahadDataMapperFile extends Zend_Tool_Proje
         
         $filter = new Zend_Filter_Word_DashToCamelCase();
         $name = $filter->filter($this->_dataMapperName);
-        $className = $moduleName . '_Model_DataMapper_' . $name;
+        $className = $moduleName . '_Model_Mapper_' . $name;
         
         $fetchAllMethod = <<<end_method
 \$dao = \$this->getDao();
