@@ -53,7 +53,7 @@ class Galahad_Tool_Project_Context_GalahadModelFile extends Zend_Tool_Project_Co
     protected $_tableName = 'modelName';
     
     /** @var string */
-    protected $_moduleName = 'Default';
+    protected $_moduleName = 'Application';
     
     /**
      * init()
@@ -111,7 +111,7 @@ class Galahad_Tool_Project_Context_GalahadModelFile extends Zend_Tool_Project_Co
 
         $filter = new Zend_Filter_Word_DashToCamelCase();
         
-        $className = ($this->_moduleName ? ucfirst($this->_moduleName) : 'Default');
+        $className = ($this->_moduleName ? ucfirst($this->_moduleName) : 'Application');
         $className .= '_Model_' . $filter->filter($this->_modelName);
         
         $codeGenFile = new Zend_CodeGenerator_Php_File(array(

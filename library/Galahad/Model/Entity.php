@@ -221,7 +221,7 @@ abstract class Galahad_Model_Entity
      * 
      * @param Zend_Acl $acl
      */
-    public function setDefaultAcl(Zend_Acl $acl)
+    public static function setDefaultAcl(Zend_Acl $acl)
     {
     	self::$_defaultAcl = $acl;
     }

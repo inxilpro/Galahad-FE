@@ -107,11 +107,11 @@ class Galahad_Tool_Project_Context_GalahadCollectionFile extends Zend_Tool_Proje
      */
     public function getContents()
     {
-        $moduleName = 'Default';
+        $moduleName = 'Application';
         $parent = $this->_resource->getParentResource()->getParentResource()->getParentResource()->getContext();
         if ($parent instanceof Zend_Tool_Project_Context_Zf_ModuleDirectory) {
             $moduleName = ucfirst($parent->getModuleName());
-            // $className = ($this->_moduleName ? ucfirst($this->_moduleName) : 'Default');
+            // $className = ($this->_moduleName ? ucfirst($this->_moduleName) : 'Application');
         }
         
         $filter = new Zend_Filter_Word_UnderscoreToCamelCase();
