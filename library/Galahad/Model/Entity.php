@@ -22,6 +22,9 @@
 /** @see Galahad_Model */
 require_once 'Galahad/Model.php';
 
+/** @see Zend_Acl_Resource_Interface */
+require_once 'Zend/Acl/Resource/Interface.php';
+
 /** @see Zend_Filter_Word_UnderscoreToCamelCase */
 require_once 'Zend/Filter/Word/UnderscoreToCamelCase.php';
 
