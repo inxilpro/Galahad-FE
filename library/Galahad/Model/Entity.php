@@ -129,7 +129,7 @@ abstract class Galahad_Model_Entity
             // TODO: Refactor?
             if (!method_exists($this, $method)) {
             	// Where foreign key, set the relationship
-            	if ('Id' == substr($method, -2)) {
+            	if ('Id' != $property && 'Id' == substr($method, -2)) {
             		$method = substr($method, 0, -2);
             		if (!method_exists($this, $method)) {
             			throw new BadMethodCallException("No property '$property' exists");
@@ -182,7 +182,7 @@ abstract class Galahad_Model_Entity
             $name = ucfirst($name);
         }
         
-        $className = "{$namespace}_Model_DataMapper_{$name}";
+        $className = "{$namespace}_Model_Mapper_{$name}";
         
         if (!$dataMapper = self::getObjectFromCache($className)) {
             $dataMapper = new $className();
@@ -247,7 +247,7 @@ abstract class Galahad_Model_Entity
     public function setAcl(Zend_Acl $acl)
     {
     	$this->_acl = $acl;
-		if (!$this->_acl->has($this->getResourceId())) {
+		if (!$this->_acl->has($this)) {
 			$this->_acl->add($this);
 			// TODO: Use reflection to add all the methods?
 		}
@@ -312,7 +312,7 @@ abstract class Galahad_Model_Entity
      * Get the model's resource ID
      * 
      * Default resource IDs are in the format:
-     * Default_Model_User -> model:default.model.user
+     * Default_Model_User -> model:default.user
      * 
      * @see Zend_Acl_Resource_Interface
      * @see Galahad_Model_Entity::_ensureResource()
@@ -380,9 +380,9 @@ abstract class Galahad_Model_Entity
 			$auth = Zend_Auth::getInstance();
             if ($auth->hasIdentity()) {
 				$this->setRole($auth->getIdentity());
+            } else {
+				$this->setRole(self::getDefaultRole());
             }
-            
-            $this->setRole(self::getDefaultRole());
         }
 
         return $this->_role;
