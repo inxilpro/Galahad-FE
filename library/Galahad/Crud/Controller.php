@@ -144,7 +144,7 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
     /**
      * Save data
      * @param Zend_Form $form
-     * @param Default_Model_Entity $entity
+     * @param Galahad_Model_Entity $entity
      */
 	protected function _save(Zend_Form $form, Galahad_Model_Entity $entity = null)
     {

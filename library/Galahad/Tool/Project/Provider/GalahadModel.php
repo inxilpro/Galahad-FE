@@ -42,7 +42,6 @@ class Galahad_Tool_Project_Provider_GalahadModel extends Galahad_Tool_Project_Pr
     /**
      * create()
      *
-     * @todo Remember to namespace with Default_ if $module is NULL
      * @param string $name
      */
     public function create($name, $collectionIncluded = true, $dataMapperIncluded = true, $formIncluded = true, $tableIncluded = true, $module = null)

@@ -37,7 +37,6 @@ class Galahad_Tool_Project_Provider_GalahadDbTable extends Galahad_Tool_Project_
     /**
      * create()
      *
-     * @todo Remember to namespace with Default_ if $module is NULL
      * @param string $name
      */
     public function create($tableName, $module = null)

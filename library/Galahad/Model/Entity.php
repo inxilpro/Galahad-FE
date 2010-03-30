@@ -312,7 +312,7 @@ abstract class Galahad_Model_Entity
      * Get the model's resource ID
      * 
      * Default resource IDs are in the format:
-     * Default_Model_User -> model:default.user
+     * Application_Model_User -> model:application.user
      * 
      * @see Zend_Acl_Resource_Interface
      * @see Galahad_Model_Entity::_ensureResource()

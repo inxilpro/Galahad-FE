@@ -37,7 +37,6 @@ class Galahad_Tool_Project_Provider_GalahadCollection extends Galahad_Tool_Proje
     /**
      * create()
      *
-     * @todo Remember to namespace with Default_ if $module is NULL
      * @param string $name
      */
     public function create($name, $module = null)

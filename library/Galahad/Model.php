@@ -36,7 +36,7 @@ abstract class Galahad_Model
     protected static $_objectCache = array();
     
     /**
-     * Gets namespace of class (Default_ or Admin_ for example)
+     * Gets namespace of class (Application_ or Admin_ for example)
      * 
      * @param string $className
      * @return string
