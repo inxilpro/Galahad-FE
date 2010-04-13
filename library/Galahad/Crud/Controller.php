@@ -96,8 +96,14 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
     	$form->addElement('submit', 'submit', array('label' => "Add {$this->_singular}", 'class' => 'large button'))
     		 ->setAction($this->_helper->url('insert'))
     		 ->setMethod('post');
-    		 
-		$form->removeElement('id');
+
+    	$primaryKey = $this->_primaryKey;
+    	if (!is_array($primaryKey)) {
+    		$primaryKey = (array) $primaryKey;
+    	}
+    	foreach ($primaryKey as $key) {
+			$form->removeElement($key);
+    	}
 		
 		$this->_save($form);
 		$this->view->form = $form;
@@ -122,6 +128,7 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
 		if (!$entity = $dm->fetchByPrimary($primaryKey)) {
 			$this->_helper->flashMessenger("No Such {$this->_singular} Exists."); // TODO: Translate
 			$this->_helper->redirector('insert');
+			return;
 		}
 		
 		$this->view->placeholder('title')->set("Update {$this->_singular}");
