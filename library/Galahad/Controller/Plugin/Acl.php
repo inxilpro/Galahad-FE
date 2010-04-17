@@ -109,15 +109,17 @@ class Galahad_Controller_Plugin_Acl extends Zend_Controller_Plugin_Abstract
 			$module = 'default';
 		}
 		$controller = $request->getControllerName();
-		$action = $request->getActionName();
+		$action = str_replace('-', '', $request->getActionName()); // Fixes multiword resource names
 		
 		$resourceName = "mvc:{$module}.{$controller}.{$action}";
 		if (!$this->_acl->has($resourceName)) {
 			$this->_acl->addResource($resourceName);
 		}
 		
-		if (!$this->_acl->isAllowed($this->getRole(), $resourceName, 'dispatch')) {
-			throw new Galahad_Acl_Exception('You are not authorized to access this action.');
+		$roleName = $this->getRole();
+		
+		if (!$this->_acl->isAllowed($roleName, $resourceName, 'dispatch')) {
+			throw new Galahad_Acl_Exception("Role '{$roleName}' is not allowed to access '{$resourceName}'.");
 		}
 	}
 	
