@@ -123,4 +123,14 @@ class Galahad_Model_DbTable extends Zend_Db_Table
 		$r = $this->fetchAll($constraint)->current()->toArray();
 		return $r['c'];
 	}
+	
+	/**
+	 * Fetch a DbTable constraint object (essentially a Zend_Db_Table_Select object)
+	 * 
+	 * @return Galahad_Model_DbTable_Constraint
+	 */
+	public function getConstraint()
+	{
+		return new Galahad_Model_DbTable_Constraint($this);
+	}
 }

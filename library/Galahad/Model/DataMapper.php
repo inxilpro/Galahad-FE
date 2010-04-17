@@ -59,12 +59,6 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	protected $_collectionClass;
 	
 	/**
-	 * Class name for generated collections
-	 * @var string
-	 */
-	protected $_constraintClass = 'Galahad_Model_DbTable_Constraint';
-	
-	/**
 	 * Paginator
 	 * 
 	 * @var Zend_Paginator_Adapter_Interface
@@ -125,8 +119,7 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	 */
 	public function constraint()
 	{
-		$className = $this->_getConstraintClass();
-		return new $className($this->getDao()); // TODO: How to handle this dependency?
+		return $this->getDao()->getConstraint();
 	}
 	
 	/**
@@ -234,24 +227,6 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 		}
 		
 		return $this->_collectionClass;
-	}
-	
-	/**
-	 * Manually set the Constraint class to use
-	 * @param string $className
-	 */
-	public function setConstraintClass($className)
-	{
-		$this->_constraintClass = $className;
-	}
-	
-	/**
-	 * Get the constraint class
-	 * @return string
-	 */
-	protected function _getConstraintClass()
-	{
-		return $this->_constraintClass;
 	}
 	
 	protected function _convertModelToId(array &$data, $indexFrom, $indexTo, $className, $method = 'getId')
