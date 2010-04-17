@@ -271,6 +271,7 @@ abstract class Galahad_Model_Entity
     		}
     	}
     	
+    	$this->_initAcl($this->_acl);
     	return $this->_acl;
     }
     
