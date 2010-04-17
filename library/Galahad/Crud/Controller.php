@@ -61,6 +61,12 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
 	protected $_singular, $_plural;
 	
 	/**
+	 * Form to be used to manipulate entity
+	 * @var Zend_Form
+	 */
+	private $_form = null;
+	
+	/**
 	 * Index just points to listAction
 	 */
 	public function indexAction()
@@ -218,8 +224,12 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
      */
 	protected function _getForm()
     {
-    	$entity = new $this->_entityClass;
-    	return $entity->getForm();
+    	if (null == $this->_form) {
+    		$entity = new $this->_entityClass;
+    		$this->_form = $entity->getForm();
+    	}
+    	
+    	return $this->_form;
     }
 	
 	/**
