@@ -27,7 +27,7 @@
  * @copyright  Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-interface DaoInterface
+interface Galahad_Model_DaoInterface
 {
 	/**
 	 * Fetch all data matching constaint
