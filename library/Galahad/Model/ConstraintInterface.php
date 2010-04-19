@@ -20,7 +20,7 @@
  */
 
 /**
- * Provides base functionality for data mappers
+ * Interface for model query constraints
  * 
  * @category   Galahad
  * @package    Galahad_Model
