@@ -30,8 +30,40 @@ require_once 'Zend/Db/Table.php';
  * @copyright  Copyright (c) 2010 Chris Morrell <http://cmorrell.com>
  * @license    GPL <http://www.gnu.org/licenses/>
  */
-class Galahad_Model_DbTable extends Zend_Db_Table 
+abstract class Galahad_Model_DbTable 
+	extends Zend_Db_Table
+	implements Galahad_Model_DaoInterface
 {
+	/**
+	 * Fetch all rows matching constraint
+	 * 
+	 * @param Galahad_Model_DbTable_Constraint $constraint
+	 * @return array
+	 */
+	public function fetchAll(Galahad_Model_DbTable_Constraint $constraint)
+	{
+		$result = parent::fetchAll($constraint);
+		return $result->toArray();
+	}
+	
+	/**
+	 * Fetches a row by primary key(s)
+	 * 
+	 * @param mixed|array $primaryKey
+	 * @return array|false
+	 */
+	public function fetchByPrimary($primaryKey)
+	{
+		$results = call_user_func_array(array($this, 'find'), (array) $primaryKey);
+
+        if (1 != count($results)) {
+        	return false;
+        }
+        
+        $data = $results->current()->toArray();
+        return $data;
+	}
+	
 	/**
 	 * Saves data to the table
 	 * 
@@ -40,8 +72,9 @@ class Galahad_Model_DbTable extends Zend_Db_Table
 	 * @param array $data
 	 * @return mixed
 	 */
-	public function save(array $data)
+	public function save(Galahad_Model_Entity $entity)
 	{
+		$data = $entity->toArray();
 		$this->_setupPrimaryKey();
 		
         $keyCount = 0;
@@ -69,22 +102,13 @@ class Galahad_Model_DbTable extends Zend_Db_Table
 	}
 	
 	/**
-	 * Fetches a row by primary key(s)
+	 * Delete an entity
 	 * 
-	 * @param mixed|array $primaryKey
-	 * @return array|false
+	 * @todo  Maybe implement something in Galahad_Model_Entity to facilitate this?
+	 * @param Galahad_Model_Entity $entity
+	 * @return boolean
 	 */
-	public function fetchByPrimary($primaryKey)
-	{
-		$results = call_user_func_array(array($this, 'find'), (array) $primaryKey);
-
-        if (1 != count($results)) {
-        	return false;
-        }
-        
-        $data = $results->current()->toArray();
-        return $data;
-	}
+	abstract public function delete(Galahad_Model_Entity $entity);
 	
 	/**
 	 * Deletes an entity from storage based on its primary key
