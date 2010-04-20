@@ -94,6 +94,6 @@ class Galahad_Paginator_Adapter_Model implements Zend_Paginator_Adapter_Interfac
     	// echo "<p>Offset: '{$offset}' - Item Count Per Page: '{$itemCountPerPage}'</p>";
     	// public function limit($count = null, $offset = null);
     	$this->_constraint->limit($itemCountPerPage, $offset);
-    	return $this->_mapper->fetchAll($this->_constraint);
+    	return $this->_mapper->fetch($this->_constraint);
     }
 }
