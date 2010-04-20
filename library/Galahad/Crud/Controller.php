@@ -29,6 +29,9 @@
  */
 abstract class Galahad_Crud_Controller extends Zend_Controller_Action
 {
+	const INSERT = 'insert';
+	const UPDATE = 'update';
+	
 	/**
 	 * Class names for models
 	 * @var string
@@ -111,7 +114,7 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
 			$form->removeElement($key);
     	}
 		
-		$this->_save($form);
+		$this->_save($form, self::INSERT);
 		$this->view->form = $form;
     }
     
@@ -148,7 +151,7 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
     	$defaults = $this->_processDefaults($defaults);
     		 
     	$form->setDefaults($defaults);
-    	$this->_save($form, $entity);
+    	$this->_save($form, self::UPDATE, $entity);
     	
     	$this->view->form = $form;
     	$this->view->entity = $entity;
@@ -156,11 +159,16 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
     
     /**
      * Save data
+     * 
      * @param Zend_Form $form
      * @param Galahad_Model_Entity $entity
      */
-	protected function _save(Zend_Form $form, Galahad_Model_Entity $entity = null)
+	protected function _save(Zend_Form $form, $action, Galahad_Model_Entity $entity = null)
     {
+    	if ($action != self::INSERT && $action != self::UPDATE) {
+    		throw new Galahad_Exception('You must either save or update an entry.');
+    	}
+    	
     	$request = $this->getRequest();
     	
     	if (!$request->isPost()) {
@@ -180,21 +188,30 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
 			
 			$entity->reset($data);
 			
-			if ($result = $entity->save()) { // TODO: Move into Service?
-				$this->_helper->flashMessenger("{$this->_singular} Saved!");
-			} else {
-				$this->_helper->flashMessenger('There were no changes to save!');
-			}
-			
-			require_once 'Zend/Filter/Word/UnderscoreToCamelCase.php';
+			// Build ID
+    		require_once 'Zend/Filter/Word/UnderscoreToCamelCase.php';
 			$filter = new Zend_Filter_Word_UnderscoreToCamelCase();
 			
-	    	$routeOptions = array();
+	    	$id = array();
 	    	foreach ((array) $this->_primaryKey as $key) {
 	    		$getter = 'get' . $filter->filter($key);
-	    		$routeOptions[$key] = $entity->$getter();
+	    		$id[$key] = $entity->$getter();
 	    	}
-			$this->_helper->redirector->gotoSimple('edit', null, null, $routeOptions);
+			
+	    	// Save
+	    	if (self::INSERT == $action) {
+	    		if ($entity->getDataMapper()->insert($entity)) {
+	    			$this->_helper->flashMessenger("{$this->_singular} Added!");
+	    		} else {
+	    			throw new Galahad_Exception('There was an error adding the ' . $this->_singular);
+	    		}
+	    	} else if (self::UPDATE == $action) {
+	    		if ($entity->getDataMapper()->update($id, $entity)) {
+	    			$this->_helper->flashMessenger("{$this->_singular} Updated!");
+	    		}
+	    	}
+	    	
+			$this->_helper->redirector->gotoSimple('edit', null, null, $id);
 		} else {
 			$this->view->errors = true;
 			return false;
