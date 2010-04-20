@@ -72,22 +72,31 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	 * @param Galahad_Model_ConstraintInterface $constraint
 	 * @return Galahad_Model_Collection
 	 */
-	abstract public function fetchAll(Galahad_Model_ConstraintInterface $constraint = null);
+	abstract public function fetch(Galahad_Model_ConstraintInterface $constraint = null);
 	
 	/**
-	 * Fetch a single Entity by its Primary Key
+	 * Fetch a single Entity by its ID/Primary Key
 	 * 
 	 * @todo Maybe make a non-abstract version of this
-	 * @param mixed $primaryKey Most likely a string, integer, or array
+	 * @param mixed $id Most likely a string, integer, or array
 	 */
-	abstract public function fetchByPrimary($primaryKey);
+	abstract public function fetchById($id);
 	
 	/**
-	 * Save a Entity in storage
+	 * Insert an Entity into storage
+	 * @param Galahad_Model_Entity $entity
+	 * @return mixed ID/Primary Key
+	 */
+	abstract public function insert(Galahad_Model_Entity $entity);
+	
+	/**
+	 * Update an Entity in storage
+	 * 
+	 * @param mixed $id
 	 * @param Galahad_Model_Entity $entity
 	 * @return boolean
 	 */
-	abstract public function save(Galahad_Model_Entity $entity);
+	abstract public function update(Galahad_Model_Entity $entity);
 	
 	/**
 	 * Delete an Entity from storage
@@ -96,10 +105,10 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	abstract public function delete(Galahad_Model_Entity $entity);
 	
 	/**
-	 * Delete an Entity from storage using its Primary Key
+	 * Delete an Entity from storage using its ID/Primary Key
 	 * @param mixed $primaryKey Most likely a string, integer, or array
 	 */
-	abstract public function deleteByPrimary($primaryKey);
+	abstract public function deleteById($id);
 	
 	/**
 	 * Get a count of Entities in storage
@@ -150,6 +159,7 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
     protected function _getDaoClass()
 	{
 		if (null == $this->_daoClass) {
+			// TODO: Rethink this
 		    $namespace = self::getClassNamespace($this);
 		    $modelName = self::getClassType($this);
 			$this->_daoClass =  "{$namespace}_Model_DbTable_{$modelName}";
@@ -227,22 +237,6 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 		}
 		
 		return $this->_collectionClass;
-	}
-	
-	protected function _convertModelToId(array &$data, $indexFrom, $indexTo, $className, $method = 'getId')
-	{
-		if (isset($data[$indexFrom])) {
-	        if ($data[$indexFrom] instanceof $className) {
-	    		$data[$indexTo] = $data[$indexFrom]->{$method}();
-	    	} elseif (is_int($data[$indexFrom])) {
-	    		$data[$indexTo] = $data[$indexFrom];
-	    	} else {
-	    		$data[$indexTo] = null;
-	    	}
-	    	unset($data[$indexFrom]);
-        }
-        
-        return $data;
 	}
 }
 

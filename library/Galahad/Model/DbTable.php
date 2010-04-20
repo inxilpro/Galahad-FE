@@ -40,8 +40,12 @@ abstract class Galahad_Model_DbTable
 	 * @param Galahad_Model_DbTable_Constraint $constraint
 	 * @return array
 	 */
-	public function fetchAll(Galahad_Model_DbTable_Constraint $constraint)
+	public function fetch(Galahad_Model_ConstraintInterface $constraint)
 	{
+		if (!$constraint instanceof Galahad_Model_DbTable_Constraint) {
+			throw new InvalidArgumentException("Galahad_Model_DbTable::fetch() expects its constraint to be of type 'Galahad_Model_DbTable_Constraint'");
+		}
+		
 		$result = parent::fetchAll($constraint);
 		return $result->toArray();
 	}
@@ -52,9 +56,9 @@ abstract class Galahad_Model_DbTable
 	 * @param mixed|array $primaryKey
 	 * @return array|false
 	 */
-	public function fetchByPrimary($primaryKey)
+	public function fetchById($id)
 	{
-		$results = call_user_func_array(array($this, 'find'), (array) $primaryKey);
+		$results = call_user_func_array(array($this, 'find'), (array) $id);
 
         if (1 != count($results)) {
         	return false;
@@ -65,6 +69,32 @@ abstract class Galahad_Model_DbTable
 	}
 	
 	/**
+	 * Inserts a new entity into the database
+	 * 
+	 * @param array $data
+	 * @return mixed The entity's primary key data
+	 */
+	public function insert(array $data)
+	{
+		$data = $this->_prepData($data);
+		return parent::insert($data);
+	}
+	
+	/**
+	 * Update an existing entity in the database
+	 * 
+	 * @param mixed $id
+	 * @param array $data
+	 * @return boolean
+	 */
+	public function update($id, array $data)
+	{
+		$where = $this->_buildPrimaryKeyWhere($id);
+		$data = $this->_prepData($data);
+		return (1 == parent::update($data, $where));
+	}
+	
+	/**
 	 * Saves data to the table
 	 * 
 	 * Sorts out whether it's an insert or update based on primary key(s)
@@ -72,6 +102,7 @@ abstract class Galahad_Model_DbTable
 	 * @param array $data
 	 * @return mixed
 	 */
+	/*
 	public function save(Galahad_Model_Entity $entity)
 	{
 		$data = $entity->toArray();
@@ -100,15 +131,7 @@ abstract class Galahad_Model_DbTable
         
         return $this->insert($data);
 	}
-	
-	/**
-	 * Delete an entity
-	 * 
-	 * @todo  Maybe implement something in Galahad_Model_Entity to facilitate this?
-	 * @param Galahad_Model_Entity $entity
-	 * @return boolean
-	 */
-	abstract public function delete(Galahad_Model_Entity $entity);
+	*/
 	
 	/**
 	 * Deletes an entity from storage based on its primary key
@@ -116,18 +139,9 @@ abstract class Galahad_Model_DbTable
 	 * @param mixed|array $primaryKey
 	 * @return boolean
 	 */
-	public function deleteByPrimary($primaryKey)
+	public function deleteById($id)
 	{
-		$this->_setupPrimaryKey();
-		
-		$keyColumns = $this->_primary;
-		$primaryKey = (array) $primaryKey;
-		
-		$where = array();
-		foreach ($keyColumns as $i => $column) {
-			$where[] = $this->getAdapter()->quoteInto("{$column} = ?", $primaryKey[$i - 1]);
-		}
-		
+		$where = $this->_buildPrimaryKeyWhere($id);
 		return (1 == $this->delete($where));
 	}
 	
@@ -136,8 +150,12 @@ abstract class Galahad_Model_DbTable
 	 * 
 	 * @param Galahad_Model_DbTable_Constraint $constraint
 	 */
-	public function count(Galahad_Model_DbTable_Constraint $constraint = null)
+	public function count(Galahad_Model_ConstraintInterface $constraint = null)
 	{
+		if (!$constraint instanceof Galahad_Model_DbTable_Constraint) {
+			throw new InvalidArgumentException("Galahad_Model_DbTable::count() expects its constraint to be of type 'Galahad_Model_DbTable_Constraint'");
+		}
+		
 		if (null == $constraint) {
 			$constraint = $this->select();
 		}
@@ -156,5 +174,74 @@ abstract class Galahad_Model_DbTable
 	public function getConstraint()
 	{
 		return new Galahad_Model_DbTable_Constraint($this);
+	}
+	
+	/**
+	 * Prepare data for insert/update
+	 * 
+	 * @param array $data
+	 * @return array
+	 */
+	protected function _prepData(array $data)
+	{
+		return $data;
+	}
+	
+	/**
+	 * Ensures that ID is in col => value format
+	 * 
+	 * @param mixed $id
+	 * @return array
+	 */
+	protected function _normalizeId($id)
+	{
+		$this->_setupPrimaryKey();
+		
+		if (!is_array($id)) {
+			$id = array($this->_primary[0] => $id);
+		}
+		if (count($id) != count($this->_primary)) {
+			throw new Galahad_Model_Exception('Primary key is an invalid length');
+		}
+		
+		return $id;
+	}
+	
+	protected function _buildPrimaryKeyWhere($id)
+	{
+		$id = $this->_normalizeId($id);
+		$where = array();
+		foreach ($this->_primary as $column) {
+			if (!isset($id[$column])) {
+				throw new Exception("Column '{$column}' must be set for this operation.");
+			}
+			$where[] = $this->getAdapter()->quoteInto("{$column} = ?", $id[$column]);
+		}
+		
+		return $where;
+	}
+	
+	/**
+	 * @todo  Get rid of thisÑseems messy
+	 * @param array $data
+	 * @param string $indexFrom
+	 * @param string $indexTo
+	 * @param string $className
+	 * @param string $method
+	 */
+	protected function _convertModelToId(array &$data, $indexFrom, $indexTo, $className, $method = 'getId')
+	{
+		if (isset($data[$indexFrom])) {
+	        if ($data[$indexFrom] instanceof $className) {
+	    		$data[$indexTo] = $data[$indexFrom]->{$method}();
+	    	} elseif (is_int($data[$indexFrom])) {
+	    		$data[$indexTo] = $data[$indexFrom];
+	    	} else {
+	    		$data[$indexTo] = null;
+	    	}
+	    	unset($data[$indexFrom]);
+        }
+        
+        return $data;
 	}
 }

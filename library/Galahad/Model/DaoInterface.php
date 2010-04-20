@@ -35,39 +35,39 @@ interface Galahad_Model_DaoInterface
 	 * @param Galahad_Model_ConstraintInterface $constraint
 	 * @return array
 	 */
-	public function fetchAll(Galahad_Model_ConstraintInterface $constraint);
+	public function fetch(Galahad_Model_ConstraintInterface $constraint);
 	
 	/**
-	 * Fetch single "row" of data by primary key
+	 * Fetch single "row" of data by id/primary key
 	 * 
-	 * @param mixed $primaryKey
+	 * @param mixed $id
 	 * @return array
 	 */
-	public function fetchByPrimary($primaryKey);
+	public function fetchById($id);
 	
 	/**
-	 * Save an entity into persistent storage
+	 * Insert an entity into persistent storage
 	 * 
-	 * @param Galahad_Model_Entity $entity
-	 * @return boolean
+	 * @param array $data
+	 * @return mixed Entity ID/Primary Key
 	 */
-	public function save(Galahad_Model_Entity $entity);
+	public function insert(array $data);
 	
 	/**
-	 * Delete an entity from persistent storage
+	 * Update an entity in persistent storage
 	 * 
-	 * @param Galahad_Model_Entity $entity
-	 * @return boolean
+	 * @param mixed $id
+	 * @param array $data
 	 */
-	public function delete(Galahad_Model_Entity $entity);
+	public function update($id, array $data);
 	
 	/**
-	 * Delete an entity by its primary key from persistent storage
+	 * Delete an entity by its ID from persistent storage
 	 * 
-	 * @param mixed $primaryKey
+	 * @param mixed $id
 	 * @return boolean
 	 */
-	public function deleteByPrimary($primaryKey);
+	public function deleteById($id);
 	
 	/**
 	 * Count the data matching a constraint (or all)

@@ -103,17 +103,6 @@ abstract class Galahad_Model_Entity
     }
     
     /**
-     * Basic persistence functionality
-     * 
-     * @return boolean
-     */
-    public function save()
-    {
-        $dataMapper = $this->getDataMapper();
-        return $dataMapper->save($this);
-    }
-    
-    /**
      * Resets the entity with new data
      * 
      * @param array $data
