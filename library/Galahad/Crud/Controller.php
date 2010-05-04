@@ -134,7 +134,7 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
     	}
 		
 		$dm = new $this->_dataMapperClass();
-		if (!$entity = $dm->fetchByPrimary($primaryKey)) {
+		if (!$entity = $dm->fetchById($primaryKey)) {
 			$this->_helper->flashMessenger("No Such {$this->_singular} Exists."); // TODO: Translate
 			$this->_helper->redirector('insert');
 			return;
