@@ -29,6 +29,11 @@
  */
 abstract class Galahad_Model
 {
+	const TYPE_ENTITY = 'entity';
+	const TYPE_COLLECTION = 'collection';
+	const TYPE_DBTABLE = 'dbtable';
+	const TYPE_DATAMAPPER = 'datamapper';
+	
 	/**
      * Stores common objects like Forms and DAOs
      * @var array
@@ -61,6 +66,35 @@ abstract class Galahad_Model
             $className = get_class($className);
         }
         return substr($className, strrpos($className, '_') + 1);
+    }
+    
+	/**
+     * Gets the name of a sibling class
+     * 
+     * For example, if supplied with Admin_Model_Collection_User and asked
+     * for the Data Mapper, would return Admin_Model_Mapper_User
+     * 
+     * @param string $className
+     * @param string siblingType
+     * @return string
+     */
+    public static function getClassSibling($className, $siblingType)
+    {
+        $namespace = self::getClassNamespace($className);
+        $type = self::getClassType($className);
+        
+        switch ($siblingType) {
+        	case self::TYPE_COLLECTION:
+        		return "{$namespace}_Model_Collection_{$type}";
+        	case self::TYPE_DATAMAPPER:
+        		return "{$namespace}_Model_Mapper_{$type}";
+        	case self::TYPE_DBTABLE:
+        		return "{$namespace}_Model_DbTable_{$type}";
+        	case self::TYPE_ENTITY:
+        		return "{$namespace}_Model_{$type}";
+        }
+        
+        throw new Galahad_Model_Exception("No such model type: '{$siblingType}'");
     }
     
     /**
