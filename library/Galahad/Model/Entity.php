@@ -155,6 +155,14 @@ abstract class Galahad_Model_Entity
     	return $data;
     }
     
+    /**
+     * Gets the model's IDÑwhatever that means in the model's context
+     * Should return false if entity does not yet have an ID
+     * 
+     * @return mixed
+     */
+    abstract public function getId();
+    
 	/**
      * Gets a Data Mapper object
      * 

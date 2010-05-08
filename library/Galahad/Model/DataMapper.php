@@ -68,26 +68,46 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	/**
 	 * Fetch all Entities as a Collection
 	 * 
-	 * @todo Maybe make a non-abstract version of this
 	 * @param Galahad_Model_ConstraintInterface $constraint
 	 * @return Galahad_Model_Collection
 	 */
-	abstract public function fetch(Galahad_Model_ConstraintInterface $constraint = null);
+	public function fetch(Galahad_Model_ConstraintInterface $constraint = null)
+	{
+        $dao = $this->getDao();
+        $data = $dao->fetch($constraint);
+        
+        $collectionClass = Galahad_Model::getClassSibling($this, Galahad_Model::TYPE_COLLECTION);
+        return new $collectionClass($data);
+	}
 	
 	/**
 	 * Fetch a single Entity by its ID/Primary Key
 	 * 
-	 * @todo Maybe make a non-abstract version of this
 	 * @param mixed $id Most likely a string, integer, or array
 	 */
-	abstract public function fetchById($id);
+	public function fetchById($id)
+	{
+		$dao = $this->getDao();
+        $data = $dao->fetchById($id);
+                
+        if (!$data) {
+        	return false;
+        }
+                
+        $entityClass = Galahad_Model::getClassSibling($this, Galahad_Model::TYPE_ENTITY);
+        return new $entityClass($data);
+	}
 	
 	/**
 	 * Insert an Entity into storage
 	 * @param Galahad_Model_Entity $entity
 	 * @return mixed ID/Primary Key
 	 */
-	abstract public function insert(Galahad_Model_Entity $entity);
+	public function insert(Galahad_Model_Entity $entity)
+	{
+        $dao = $this->getDao();
+        return $dao->insert($entity->toArray());
+	}
 	
 	/**
 	 * Update an Entity in storage
@@ -96,19 +116,36 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	 * @param Galahad_Model_Entity $entity
 	 * @return boolean
 	 */
-	abstract public function update(Galahad_Model_Entity $entity);
+	public function update(Galahad_Model_Entity $entity)
+	{
+        $dao = $this->getDao();
+        return $dao->update($entity->getId(), $entity->toArray());
+	}
 	
 	/**
 	 * Delete an Entity from storage
 	 * @param Galahad_Model_Entity $entity
 	 */
-	abstract public function delete(Galahad_Model_Entity $entity);
+	public function delete(Galahad_Model_Entity $entity)
+	{
+		if (!$id = $entity->getId()) {
+    		// TODO: Test this
+    		// TODO: Create a new exception?
+    		throw new Galahad_Model_Exception('Cannot delete an entity that does not yet have an ID.');
+    	}
+    	
+        return $this->deleteById($id);
+	}
 	
 	/**
 	 * Delete an Entity from storage using its ID/Primary Key
 	 * @param mixed $primaryKey Most likely a string, integer, or array
 	 */
-	abstract public function deleteById($id);
+	public function deleteById($id)
+	{
+		$dao = $this->getDao();
+        return $dao->deleteById($id);
+	}
 	
 	/**
 	 * Get a count of Entities in storage
