@@ -244,9 +244,7 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
     protected function _getEntityClass()
 	{
 		if (null == $this->_entityClass) {
-			$namespace = self::getClassNamespace($this);
-		    $modelName = self::getClassType($this);
-			$this->_entityClass =  "{$namespace}_Model_{$modelName}";	
+			$this->_entityClass = Galahad_Model::getClassSibling($this, Galahad_Model::TYPE_ENTITY);	
 		}
 		
 		return $this->_entityClass;
@@ -268,9 +266,7 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	protected function _getCollectionClass()
 	{
 		if (null == $this->_collectionClass) {
-			$namespace = self::getClassNamespace($this);
-		    $modelName = self::getClassType($this);
-			$this->_collectionClass =  "{$namespace}_Model_Collection_{$modelName}"; // TODO: Naming?	
+			$this->_entityClass = Galahad_Model::getClassSibling($this, Galahad_Model::TYPE_COLLECTION);	
 		}
 		
 		return $this->_collectionClass;
