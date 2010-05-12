@@ -35,7 +35,7 @@ interface Galahad_Model_DaoInterface
 	 * @param Galahad_Model_ConstraintInterface $constraint
 	 * @return array
 	 */
-	public function fetch(Galahad_Model_ConstraintInterface $constraint);
+	public function fetch(Galahad_Model_ConstraintInterface $constraint = null);
 	
 	/**
 	 * Fetch single "row" of data by id/primary key
