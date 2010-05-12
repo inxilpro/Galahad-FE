@@ -40,9 +40,9 @@ abstract class Galahad_Model_DbTable
 	 * @param Galahad_Model_DbTable_Constraint $constraint
 	 * @return array
 	 */
-	public function fetch(Galahad_Model_ConstraintInterface $constraint)
+	public function fetch(Galahad_Model_ConstraintInterface $constraint = null)
 	{
-		if (!$constraint instanceof Galahad_Model_DbTable_Constraint) {
+		if (null !== $constraint && !$constraint instanceof Galahad_Model_DbTable_Constraint) {
 			throw new InvalidArgumentException("Galahad_Model_DbTable::fetch() expects its constraint to be of type 'Galahad_Model_DbTable_Constraint'");
 		}
 		
