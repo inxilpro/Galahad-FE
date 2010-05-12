@@ -75,7 +75,7 @@ class Galahad_Service_Ooyala extends Zend_Service_Abstract
 	 * @param array $params
 	 * @return Galahad_Service_Ooyala_Response
 	 */
-	public function query(array $params = null)
+	public function query(array $params = array())
 	{
 		return $this->_request('query', $params, 'Query');
 	}
@@ -373,7 +373,7 @@ class Galahad_Service_Ooyala extends Zend_Service_Abstract
 	 * @param array $params
 	 * @return Galahad_Service_Ooyala_Response
 	 */
-	protected function _request($method, array $params = null, $responseType = null)
+	protected function _request($method, array $params = array(), $responseType = null)
 	{
 		$url = $this->_url . $method;
 		
