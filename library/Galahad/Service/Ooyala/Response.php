@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of the Galahad Framework Extension.
  *
@@ -29,197 +30,222 @@
  */
 class Galahad_Service_Ooyala_Response
 {
-    /**
-     * Raw XML Data
-     * 
-     * @var string
-     */
-    protected $_raw;
+	/**
+	 * Raw XML Data
+	 * 
+	 * @var string
+	 */
+	protected $_raw;
+	
+	/**
+	 * Parsed XML Data
+	 *
+	 * @var SimpleXMLElement
+	 */
+	protected $_data;
+	
+	/**
+	 * Status of the response
+	 *
+	 * True if the response is valid, false if not
+	 *
+	 * @var boolean
+	 */
+	protected $_status = null;
+	
+	/**
+	 * Error message sent from server
+	 *
+	 * @var string
+	 */
+	protected $_errorMessage;
+	
+	/**
+	 * Original request
+	 *
+	 * @var array
+	 */
+	protected $_request = array();
+	
+	/**
+	 * The service that created this response
+	 *
+	 * @var Galahad_Service_Ooyala
+	 */
+	protected $_service;
 
-    /**
-     * Parsed XML Data
-     *
-     * @var SimpleXMLElement
-     */
-    protected $_data;
-
-    /**
-     * Status of the response
-     *
-     * True if the response is valid, false if not
-     *
-     * @var boolean
-     */
-    protected $_status = null;
-
-    /**
-     * Error message sent from server
-     *
-     * @var string
-     */
-    protected $_errorMessage;
-
-    /**
-     * Original request
-     *
-     * @var array
-     */
-    protected $_request = array();
-
-    /**
-     * The service that created this response
-     *
-     * @var Galahad_Service_Ooyala
-     */
-    protected $_service;
-
-    /**
-     * Constructor
-     *
-     * @param string $responseData
-     */
-    public function  __construct($responseData)
-    {
-	if ($responseData instanceof Zend_Http_Response) {
-	    if (!$responseData->isSuccessful()) {
-		$this->_status = false;
-		$this->_errorMessage = 'HTTP Error: ' . $responseData->getMessage();
-	    }
-	    $responseData = $responseData->getBody();
+	/**
+	 * Constructor
+	 *
+	 * @param string $responseData
+	 */
+	public function __construct($responseData)
+	{
+		if ($responseData instanceof Zend_Http_Response) {
+			if (! $responseData->isSuccessful()) {
+				$this->_status = false;
+				$this->_errorMessage = 'HTTP Error: ' . $responseData->getMessage();
+			}
+			$responseData = $responseData->getBody();
+		}
+		
+		if (! is_string($responseData)) {
+			$this->_throwException(
+				'Galahad_Ooyala_Response::__construct() accepts a Zend_Http_Response object or a string.');
+		}
+		
+		$this->_raw = trim($responseData);
+		unset($responseData);
+		
+		$this->_status = $this->_process();
 	}
 
-	if (!is_string($responseData)) {
-	    $this->_throwException('Galahad_Ooyala_Response::__construct() accepts a Zend_Http_Response object or a string.');
+	protected function _process()
+	{
+		return $this->_processXml();
 	}
 
-	$this->_raw = trim($responseData);
-	unset($responseData);
-
-	$this->_status = $this->_process();
-    }
-
-    protected function _process()
-    {
-	return $this->_processXml();
-    }
-
-    protected function _processXml()
-    {
-	$this->_data = @simplexml_load_string($this->_raw);
-
-	if (!$this->_data instanceof SimpleXMLElement) {
-	    $this->_errorMessage = $this->_raw;
-	    return false;
+	protected function _processXml()
+	{
+		$this->_data = @simplexml_load_string($this->_raw);
+		
+		if (! $this->_data instanceof SimpleXMLElement) {
+			$this->_errorMessage = $this->_raw;
+			return false;
+		}
+		
+		if ('result' == $this->_data->getName() && 'failure' == $this->_data['code']) {
+			$this->_errorMessage = (string) $this->_data;
+			return false;
+		}
+		
+		return true;
 	}
 
-	if ('result' == $this->_data->getName() && 'failure' == $this->_data['code']) {
-	    $this->_errorMessage = (string) $this->_data;
-	    return false;
+	protected function _processSimple()
+	{
+		if ("OK" !== $this->_raw) {
+			$this->_errorMessage = $this->_raw;
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public function toArray($node = null, &$array = array())
+	{
+		if (null == $node) {
+			$node = $this->_data;
+		}
+		
+		if ($node instanceof SimpleXMLElement && !count($node)) {
+			return (string) $node;
+		}
+
+		foreach ($node as $i => $item) {
+			if (isset($array[$i])) {
+				if (!is_array($array[$i])) {
+					$array[$i] = array($array[$i]);
+				}
+				$array[$i][] = $this->toArray($item, $array[$i]);
+			} else {
+				$array[$i] = $this->toArray($item);
+			}
+		}
+		
+		return $array;
 	}
 
-	return true;
-    }
-
-    protected function _processSimple()
-    {
-	if ("OK" !== $this->_raw) {
-	    $this->_errorMessage = $this->_raw;
-	    return false;
+	/**
+	 * Get the status of the response
+	 *
+	 * @return boolean
+	 */
+	public function getStatus()
+	{
+		return $this->_status;
 	}
 
-	return true;
-    }
+	/**
+	 * Get the error message if the response is an error
+	 *
+	 * @return string
+	 */
+	public function getErrorMessage()
+	{
+		return $this->_errorMessage;
+	}
 
-    /**
-     * Get the status of the response
-     *
-     * @return boolean
-     */
-    public function getStatus()
-    {
-	return $this->_status;
-    }
+	/**
+	 * Get Raw XML
+	 *
+	 * @return string
+	 */
+	public function getRawResponse()
+	{
+		return $this->_raw;
+	}
 
-    /**
-     * Get the error message if the response is an error
-     *
-     * @return string
-     */
-    public function getErrorMessage()
-    {
-	return $this->_errorMessage;
-    }
+	/**
+	 * Get Simple XML Element
+	 *
+	 * @return SimpleXMLElement
+	 */
+	public function getSimpleXML()
+	{
+		return $this->_data;
+	}
 
-    /**
-     * Get Raw XML
-     *
-     * @return string
-     */
-    public function getRawResponse()
-    {
-	return $this->_raw;
-    }
+	/**
+	 * Set the request data used to create this response
+	 *
+	 * @param array $request
+	 */
+	public function setRequest(array $request)
+	{
+		$this->_request = $request;
+	}
 
-    /**
-     * Get Simple XML Element
-     *
-     * @return SimpleXMLElement
-     */
-    public function getSimpleXML()
-    {
-	return $this->_data;
-    }
+	/**
+	 * Set the service used to create this response
+	 *
+	 * @param Galahad_Service_Ooyala $service
+	 */
+	public function setService(Galahad_Service_Ooyala $service)
+	{
+		$this->_service = $service;
+	}
 
-    /**
-     * Set the request data used to create this response
-     *
-     * @param array $request
-     */
-    public function setRequest(array $request)
-    {
-	$this->_request = $request;
-    }
+	/**
+	 * Pass everything else to SimpleXMLElement
+	 *
+	 * @param string $name
+	 * @return mixed
+	 */
+	public function __get($name)
+	{
+		return $this->_data->$name;
+	}
 
-    /**
-     * Set the service used to create this response
-     *
-     * @param Galahad_Service_Ooyala $service
-     */
-    public function setService(Galahad_Service_Ooyala $service)
-    {
-	$this->_service = $service;
-    }
+	/**
+	 * Pass everything else to SimpleXMLElement
+	 * 
+	 * @param string $name
+	 * @param array $arguments
+	 * @return mixed
+	 */
+	public function __call($name, $arguments)
+	{
+		return call_user_func_array(array($this->_data, $name), $arguments);
+	}
 
-    /**
-     * Pass everything else to SimpleXMLElement
-     *
-     * @param string $name
-     * @return mixed
-     */
-    public function  __get($name)
-    {
-	return $this->_data->$name;
-    }
-
-    /**
-     * Pass everything else to SimpleXMLElement
-     * 
-     * @param string $name
-     * @param array $arguments
-     * @return mixed
-     */
-    public function  __call($name, $arguments)
-    {
-	return call_user_func_array(array($this->_data, $name), $arguments);
-    }
-
-    /**
-     * @param string $message
-     */
-    protected function _throwException($message)
-    {
-	/** @see Galahad_Service_Ooyala_Exception */
-	require_once 'Galahad/Service/Ooyala/Exception.php';
-	throw new Galahad_Service_Ooyala_Exception($message);
-    }
+	/**
+	 * @param string $message
+	 */
+	protected function _throwException($message)
+	{
+		/** @see Galahad_Service_Ooyala_Exception */
+		require_once 'Galahad/Service/Ooyala/Exception.php';
+		throw new Galahad_Service_Ooyala_Exception($message);
+	}
 }
