@@ -181,6 +181,7 @@ abstract class Galahad_Model_Entity
         
         $className = "{$namespace}_Model_Mapper_{$name}";
         
+        // TODO: Look into this
         if (!$dataMapper = self::getObjectFromCache($className)) {
             $dataMapper = new $className();
             self::addObjectToCache($dataMapper);

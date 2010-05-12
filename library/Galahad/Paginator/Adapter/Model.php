@@ -40,7 +40,7 @@ class Galahad_Paginator_Adapter_Model implements Zend_Paginator_Adapter_Interfac
 	/**
 	 * Any constraints to apply
 	 * 
-	 * @var Galahad_Model_ConstraintInterface
+	 * @var Galahad_Model_DataMapper_ConstraintInterface
 	 */
 	private $_constraint;
 	
@@ -56,9 +56,9 @@ class Galahad_Paginator_Adapter_Model implements Zend_Paginator_Adapter_Interfac
 	 * 
 	 * @todo  Might want to reset any limit set on constraint, or throw an exception...
 	 * @param Galahad_Model_DataMapper $mapper
-	 * @param Galahad_Model_ConstraintInterface $constraint
+	 * @param Galahad_Model_DataMapper_ConstraintInterface $constraint
 	 */
-	public function __construct(Galahad_Model_DataMapper $mapper, Galahad_Model_ConstraintInterface $constraint = null)
+	public function __construct(Galahad_Model_DataMapper $mapper, Galahad_Model_DataMapper_ConstraintInterface $constraint = null)
 	{
 		$this->_mapper = $mapper;
 		

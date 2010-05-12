@@ -20,7 +20,7 @@
  */
 
 /**
- * Interface for model query constraints
+ * Provides base functionality for data mappers
  * 
  * @category   Galahad
  * @package    Galahad_Model
@@ -28,11 +28,8 @@
  * @license    GPL <http://www.gnu.org/licenses/>
  */
  
-interface Galahad_Model_ConstraintInterface
+class Galahad_Model_DataMapper_DbTable_Constraint 
+	extends Zend_Db_Table_Select 
+	implements Galahad_Model_DataMapper_ConstraintInterface
 {
-	public function where($cond, $value = null, $type = null);
-	public function orWhere($cond, $value = null, $type = null);
-	public function order($spec);
-	public function limit($count = null, $offset = null);
-	public function limitPage($page, $rowCount);
 }

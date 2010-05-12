@@ -33,19 +33,7 @@ require_once 'Galahad/Model.php';
  * @license    GPL <http://www.gnu.org/licenses/>
  */
 abstract class Galahad_Model_DataMapper extends Galahad_Model 
-{
-    /**
-     * Data Access Object used by mapper
-     * @var Galahad_Model_Dao_Interface
-     */
-	protected $_dao;
-	
-	/**
-	 * Class name for DAO
-	 * @var string
-	 */
-	protected $_daoClass;
-	
+{	
 	/**
 	 * Class name for generated entities
 	 * @var string
@@ -68,17 +56,24 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	/**
 	 * Fetch all Entities as a Collection
 	 * 
-	 * @param Galahad_Model_ConstraintInterface $constraint
+	 * @param Galahad_Model_DataMapper_ConstraintInterface $constraint
 	 * @return Galahad_Model_Collection
 	 */
-	public function fetch(Galahad_Model_ConstraintInterface $constraint = null)
+	public function fetch(Galahad_Model_DataMapper_ConstraintInterface $constraint = null)
 	{
-        $dao = $this->getDao();
-        $data = $dao->fetch($constraint);
+        $data = $this->_fetch($constraint);
         
-        $collectionClass = Galahad_Model::getClassSibling($this, Galahad_Model::TYPE_COLLECTION);
+        $collectionClass = $this->_getCollectionClass();
         return new $collectionClass($data);
 	}
+	
+	/**
+	 * Fetch all Entities as an array
+	 * 
+	 * @param Galahad_Model_DataMapper_ConstraintInterface $constraint
+	 * @return array
+	 */
+	abstract protected function _fetch(Galahad_Model_DataMapper_ConstraintInterface $constraint = null);
 	
 	/**
 	 * Fetch a single Entity by its ID/Primary Key
@@ -87,15 +82,34 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	 */
 	public function fetchById($id)
 	{
-		$dao = $this->getDao();
-        $data = $dao->fetchById($id);
-                
+		$data = $this->_fetchById($id);
         if (!$data) {
         	return false;
         }
                 
-        $entityClass = Galahad_Model::getClassSibling($this, Galahad_Model::TYPE_ENTITY);
+        $entityClass = $this->_getEntityClass();
         return new $entityClass($data);
+	}
+	
+	/**
+	 * Fetch a single entity as an array
+	 * @param mixed $id
+	 * @return array
+	 */
+	abstract protected function _fetchById($id);
+	
+	/**
+	 * Prepare data for insert/update
+	 * 
+	 * This method is meant to be subclassed by concrete data mappers.
+	 * It's useful when you need to prepare data before insert/update.
+	 * 
+	 * @param array $data
+	 * @return array
+	 */
+	protected function _prepData(array $data)
+	{
+		return $data;
 	}
 	
 	/**
@@ -103,11 +117,7 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	 * @param Galahad_Model_Entity $entity
 	 * @return mixed ID/Primary Key
 	 */
-	public function insert(Galahad_Model_Entity $entity)
-	{
-        $dao = $this->getDao();
-        return $dao->insert($entity->toArray());
-	}
+	abstract public function insert(Galahad_Model_Entity $entity);
 	
 	/**
 	 * Update an Entity in storage
@@ -116,11 +126,7 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	 * @param Galahad_Model_Entity $entity
 	 * @return boolean
 	 */
-	public function update(Galahad_Model_Entity $entity)
-	{
-        $dao = $this->getDao();
-        return $dao->update($entity->getId(), $entity->toArray());
-	}
+	abstract public function update(Galahad_Model_Entity $entity);
 	
 	/**
 	 * Delete an Entity from storage
@@ -141,93 +147,46 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	 * Delete an Entity from storage using its ID/Primary Key
 	 * @param mixed $primaryKey Most likely a string, integer, or array
 	 */
-	public function deleteById($id)
-	{
-		$dao = $this->getDao();
-        return $dao->deleteById($id);
-	}
+	abstract public function deleteById($id);
 	
 	/**
 	 * Get a count of Entities in storage
 	 * 
-	 * @param Galahad_Model_ConstraintInterface $constraint
+	 * @param Galahad_Model_DataMapper_ConstraintInterface $constraint
 	 * @return integer
 	 */
-	public function count(Galahad_Model_ConstraintInterface $constraint = null)
+	abstract public function count(Galahad_Model_DataMapper_ConstraintInterface $constraint = null);
+	
+	/**
+	 * Get a new Constraint object (fluent)
+	 * 
+	 * @return Galahad_Model_DataMapper_ConstraintInterface
+	 */
+	public function constraint()
 	{
-		return $this->getDao()->count($constraint);
+		return $this->getConstraint();
 	}
 	
 	/**
 	 * Get a new Constraint object
-	 * @return Galahad_Model_ConstraintInterface
-	 * @todo Should this be 'getConstraint' or is the fluid interface good here?
+	 * 
+	 * @return Galahad_Model_DataMapper_ConstraintInterface
 	 */
-	public function constraint()
-	{
-		return $this->getDao()->getConstraint();
-	}
+	abstract public function getConstraint();
 	
 	/**
 	 * Get a new Paginator object
 	 * 
 	 * @return Galahad_Paginator_Adapter_Model
 	 */
-	public function paginator(Galahad_Model_ConstraintInterface $constraint = null, $itemCountPerPage = 10)
+	public function paginator(Galahad_Model_DataMapper_ConstraintInterface $constraint = null, $itemCountPerPage = 10)
 	{
+		// FIXME: Confirm this works w/ new DAO-less system
 		$paginator = new Zend_Paginator(new Galahad_Paginator_Adapter_Model($this, $constraint));
 		$paginator->setItemCountPerPage($itemCountPerPage);
 		return $paginator;
 	}
-	
-	/**
-	 * Manually set the DAO's class name
-	 * @param string $className
-	 */
-	public function setDaoClass($className)
-	{
-		$this->_daoClass = $className;
-	}
-	
-	/**
-	 * Get the default class name for our DAO
-	 * @return string 
-	 */
-    protected function _getDaoClass()
-	{
-		if (null == $this->_daoClass) {
-			// TODO: Rethink this
-		    $namespace = self::getClassNamespace($this);
-		    $modelName = self::getClassType($this);
-			$this->_daoClass =  "{$namespace}_Model_DbTable_{$modelName}";
-		}
 		
-		return $this->_daoClass;
-	}
-	
-	/**
-	 * Manually set the DAO object
-	 * @param Galahad_Model_DaoInterface $dao
-	 */
-    public function setDao(Galahad_Model_DaoInterface $dao)
-	{
-		$this->_dao = $dao;
-	}
-	
-	/**
-	 * Get the DAO
-	 * @return Galahad_Model_DaoInterface
-	 */
-    public function getDao()
-	{
-		if (!isset($this->_dao)) {
-			$className = $this->_getDaoClass();
-			$this->_dao = new $className();
-		}
-		
-		return $this->_dao;
-	}
-	
 	/**
 	 * Manually set the Entity class to use
 	 * @param string $className
@@ -266,7 +225,7 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	protected function _getCollectionClass()
 	{
 		if (null == $this->_collectionClass) {
-			$this->_entityClass = Galahad_Model::getClassSibling($this, Galahad_Model::TYPE_COLLECTION);	
+			$this->_collectionClass = Galahad_Model::getClassSibling($this, Galahad_Model::TYPE_COLLECTION);	
 		}
 		
 		return $this->_collectionClass;
