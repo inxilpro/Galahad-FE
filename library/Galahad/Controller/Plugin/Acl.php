@@ -173,7 +173,7 @@ class Galahad_Controller_Plugin_Acl extends Zend_Controller_Plugin_Abstract
 		if (null === $this->_role) {
 			$auth = Zend_Auth::getInstance();
             if ($auth->hasIdentity()) {
-				$this->setRole($auth->getIdentity());
+				$this->setRole($auth->getIdentity()); // TODO: Probably should do a little more error checking here
             } else {
             	$this->setRole(self::getDefaultRole());
             }
