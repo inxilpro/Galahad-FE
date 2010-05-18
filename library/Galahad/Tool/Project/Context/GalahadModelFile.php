@@ -118,7 +118,7 @@ class Galahad_Tool_Project_Context_GalahadModelFile extends Zend_Tool_Project_Co
             'fileName' => $this->getPath(),
             'classes' => array(
                 new Zend_CodeGenerator_Php_Class(array(
-                	'docblock' => 'You must implement a getId() method before this class can be used.',
+                	// 'docblock' => 'You must implement a getId() method before this class can be used.',
                 	'abstract' => true,
                     'name' => $className,
                     'extendedClass' => 'Galahad_Model_Entity',

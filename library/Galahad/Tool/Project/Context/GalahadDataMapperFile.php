@@ -124,7 +124,7 @@ class Galahad_Tool_Project_Context_GalahadDataMapperFile extends Zend_Tool_Proje
         		// Zend_CodeGenerator_Php_Parameter::
                 new Zend_CodeGenerator_Php_Class(array(
                     'name' => $className,
-                    'extendedClass' => 'Galahad_Model_DataMapper',
+                    'extendedClass' => 'Galahad_Model_DataMapper_DbTable',
                 )),
             ),
         ));
