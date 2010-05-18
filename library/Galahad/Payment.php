@@ -33,6 +33,7 @@ class Galahad_Payment
 	const FEATURE_PRIOR_AUTHORIZATION = 'prior-authorization';
 	const FEATURE_VOID = 'void';
 	const FEATURE_REFUND = 'refund';
+	const FEATURE_RECURRING = 'recurring';
 	
 	/**
 	 * Possible features an adapter can support
@@ -44,6 +45,7 @@ class Galahad_Payment
 		self::FEATURE_PRIOR_AUTHORIZATION,
 		self::FEATURE_VOID,
 		self::FEATURE_REFUND,
+		self::FEATURE_RECURRING,
 	);
 	
 	/**

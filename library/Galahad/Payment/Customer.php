@@ -19,6 +19,9 @@
  * @version   0.3
  */
 
+/** @see Zend_Filter_Word_UnderscoreToCamelCase */
+require_once 'Zend/Filter/Word/UnderscoreToCamelCase.php';
+
 /**
  * Generic Customer Class
  * 
@@ -140,8 +143,9 @@ class Galahad_Payment_Customer implements Galahad_Payment_Customer_Interface
             }
         }
         
+        $filter = new Zend_Filter_Word_UnderscoreToCamelCase();
     	foreach ($data as $key => $value) {
-            $normalized = ucfirst($key);
+            $normalized = $filter->filter($key);
             if ('Data' == $normalized) {
                 continue;
             }

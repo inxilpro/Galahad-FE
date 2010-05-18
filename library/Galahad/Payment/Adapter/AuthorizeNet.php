@@ -35,9 +35,10 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 	 * @var array
 	 */
 	protected static $_features = array(
-		Galahad_Payment::FEATURE_PROCESS => true,
-		Galahad_Payment::FEATURE_PRIOR_AUTHORIZATION => true,
+		Galahad_Payment::FEATURE_PROCESS,
+		Galahad_Payment::FEATURE_PRIOR_AUTHORIZATION,
 		// TODO: Refund and Void transactions
+		Galahad_Payment::FEATURE_RECURRING,
 	);
 	
 	/**
@@ -72,6 +73,13 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 		'x_delim_data' => 'TRUE',
 		'x_relay_response' => 'FALSE',
 	);
+	
+	/**
+	 * Client for SOAP-based commands
+	 * 
+	 * @var Zend_Soap_Client
+	 */
+	protected $_soapClient = null;
 	
 	/**
 	 * Constructor
@@ -183,6 +191,143 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 	}
 	
 	/**
+	 * Create a subscription
+	 * 
+	 * @param Galahad_Payment_Transaction_Subscription $transaction
+	 * @return Galahad_Payment_Adapter_Response_AuthorizeNet_ARB
+	 */
+	public function subscribe(Galahad_Payment_Transaction_Subscription $transaction)
+	{
+		$client = $this->getSoapClient();
+		$parameters = array();
+		
+		// Authentication
+		$parameters['merchantAuthentication'] = array(
+			'name' => $this->_apiLoginId, 
+			'transactionKey' => $this->_apiTransactionKey,
+		);
+		
+		// Subscription
+		$parameters['subscription'] = array(
+			'paymentSchedule' => array( // FIXME:
+				'interval' => array(
+					'length' => 1,
+					'unit' => 'months',
+				),
+				'startDate' => '2010-07-03',
+				'totalOccurrences' => '9999',
+			),
+			'amount' => $transaction->getAmount(),
+		);
+		
+		if (null !== ($subscriptionName = $transaction->getSubscriptionName())) {
+			$parameters['subscription']['name'] = $subscriptionName;
+		}
+		
+		// Payment
+		$method = $transaction->getPaymentMethod();
+		if ($method instanceof Galahad_Payment_Method_CreditCard) {
+			$parameters['subscription']['payment'] = array(
+				'creditCard' => array(
+					'cardNumber' => $method->getNumber(),
+					'expirationDate' => $method->getExpirationDate('Y-m'),
+				),
+			);
+			if (null !== ($code = $method->getCode())) {
+				$parameters['subscription']['payment']['creditCard']['code'] = $code;
+			}
+		} else {
+			/** @see Galahad_Payment_Adapter_Exception */
+			require_once 'Galahad/Payment/Adapter/Exception.php';
+			throw new Galahad_Payment_Adapter_Exception('Only credit card payments are supported at this time.');
+		}
+		
+		// Order
+		$invoiceNumber = $transaction->getInvoiceNumber();
+		$description = $transaction->getComments();
+		if ($invoiceNumber || $description) {
+			$parameters['subscription']['order'] = array();
+			if ($invoiceNumber) {
+				$parameters['subscription']['order']['invoiceNumber'] = $invoiceNumber;
+			}
+			if ($description) {
+				$parameters['subscription']['order']['description'] = $description;
+			}
+		}
+		
+		// Customer
+		$customer = $transaction->getBillingCustomer();
+		$parameters['subscription']['customer'] = array();
+		if ($customerId = $customer->getCustomerId()) {
+			$parameters['subscription']['customer']['id'] = $customerId;
+		}
+		if ($customerEmail = $customer->getEmail()) {
+			$parameters['subscription']['customer']['email'] = $customerEmail;
+		}
+		if ($customerPhone = $customer->getPhoneNumber()) {
+			$parameters['subscription']['customer']['phone'] = $customerPhone;
+		}
+		if ($customerFax = $customer->getFaxNumber()) {
+			$parameters['subscription']['customer']['fax'] = $customerFax;
+		}
+		
+		$parameters['subscription']['billTo'] = array(
+			'firstName' => $customer->getFirstName(),
+			'lastName' => $customer->getLastName(),
+			'company' => $customer->getCompany(),
+			'address' => $customer->getAddressLine1() . ' ' . $customer->getAddressLine2(),
+			'city' => $customer->getCity(),
+			'state' => $customer->getState(),
+			'zip' => $customer->getPostalCode(),
+			'country' => $customer->getCountry(),
+		);
+		
+		if ($shippingRecipient = $transaction->getShippingCustomer()) {
+			$parameters['subscription']['shipTo'] = array(
+				'firstName' => $shippingRecipient->getFirstName(),
+				'lastName' => $shippingRecipient->getLastName(),
+				'company' => $shippingRecipient->getCompany(),
+				'address' => $shippingRecipient->getAddressLine1() . ' ' . $shippingRecipient->getAddressLine2(),
+				'city' => $shippingRecipient->getCity(),
+				'state' => $shippingRecipient->getState(),
+				'zip' => $shippingRecipient->getPostalCode(),
+				'country' => $shippingRecipient->getCountry(),
+			);
+		}
+		
+		$result = $client->ARBCreateSubscription($parameters);
+		$response = new Galahad_Payment_Adapter_Response_AuthorizeNet_ARB($result, $parameters);
+		
+		if ($subscriptionId = $response->getSubscriptionId()) {
+			$transaction->setSubscriptionId($subscriptionId);
+		}
+		
+		return $response;
+	}
+	
+	/**
+	 * Cancel a subscription
+	 * 
+	 * @param Galahad_Payment_Transaction_Subscription $transaction
+	 * @return Galahad_Payment_Adapter_Response
+	 */
+	public function unsubscribe(Galahad_Payment_Transaction_Subscription $transaction)
+	{
+		
+	}
+	
+	/**
+	 * Change a subscription
+	 * 
+	 * @param Galahad_Payment_Transaction_Subscription $transaction
+	 * @return Galahad_Payment_Adapter_Response
+	 */
+	public function changeSubscription(Galahad_Payment_Transaction_Subscription $transaction)
+	{
+		
+	}
+	
+	/**
 	 * Call the Authorize.net API
 	 *
 	 * @param array $parameters
@@ -205,9 +350,37 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 		$data = curl_exec($ch);
 		curl_close($ch);
 		
-		/** @see Galahad_Payment_Adapter_Response_AuthorizeNet */
-		require_once 'Galahad/Payment/Adapter/Response/AuthorizeNet.php';
-		return new Galahad_Payment_Adapter_Response_AuthorizeNet($data, $parameters);
+		/** @see Galahad_Payment_Adapter_Response_AuthorizeNet_AIM */
+		require_once 'Galahad/Payment/Adapter/Response/AuthorizeNet/AIM.php';
+		return new Galahad_Payment_Adapter_Response_AuthorizeNet_AIM($data, $parameters);
+	}
+	
+	/**
+	 * Set the SOAP client for SOAP-based commands
+	 * 
+	 * @param Zend_Soap_Client $client
+	 * @return Galahad_Payment_Adapter_AuthorizeNet
+	 */
+	public function setSoapClient(Zend_Soap_Client $client)
+	{
+		$this->_soapClient = $client;
+		return $this;
+	}
+	
+	/**
+	 * Get the SOAP client for SOAP-based commands
+	 * 
+	 * @return Zend_Soap_Client
+	 */
+	public function getSoapClient()
+	{
+		if (null == $this->_soapClient) {
+			$this->_soapClient = new Zend_Soap_Client("https://apitest.authorize.net/soap/v1/Service.asmx?WSDL", array(
+				'soap_version' => SOAP_1_1,
+			));
+		}
+		
+		return $this->_soapClient;
 	}
 	
 	/**

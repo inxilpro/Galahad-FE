@@ -230,6 +230,33 @@ abstract class Galahad_Payment_Adapter_Abstract
 	{}
 	
 	/**
+	 * Create a subscription
+	 * 
+	 * @param Galahad_Payment_Transaction_Subscription $transaction
+	 * @return Galahad_Payment_Adapter_Response
+	 */
+	public function subscribe(Galahad_Payment_Transaction_Subscription $transaction)
+	{}
+	
+	/**
+	 * Cancel a subscription
+	 * 
+	 * @param Galahad_Payment_Transaction_Subscription $transaction
+	 * @return Galahad_Payment_Adapter_Response
+	 */
+	public function unsubscribe(Galahad_Payment_Transaction_Subscription $transaction)
+	{}
+	
+	/**
+	 * Change a subscription
+	 * 
+	 * @param Galahad_Payment_Transaction_Subscription $transaction
+	 * @return Galahad_Payment_Adapter_Response
+	 */
+	public function changeSubscription(Galahad_Payment_Transaction_Subscription $transaction)
+	{}
+	
+	/**
 	 * Send a raw request via the adapter
 	 * 
 	 * Each adapter should implement this as its method for sending a raw

@@ -19,6 +19,9 @@
  * @version   0.3
  */
 
+/** @see Zend_Filter_Word_UnderscoreToCamelCase */
+require_once 'Zend/Filter/Word/UnderscoreToCamelCase.php';
+
 /**
  * Payment Transaction
  * 
@@ -111,12 +114,12 @@ class Galahad_Payment_Transaction
             }
         }
         
+        $filter = new Zend_Filter_Word_UnderscoreToCamelCase();
     	foreach ($options as $key => $value) {
-            $normalized = ucfirst($key);
+            $normalized = $filter->filter($key);
             if ('Options' == $normalized) {
                 continue;
             }
-
             $method = 'set' . $normalized;
             if (method_exists($this, $method)) {
                 $this->$method($value);
