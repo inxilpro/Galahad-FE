@@ -385,6 +385,7 @@ class Galahad_Service_Ooyala extends Zend_Service_Abstract
 		
 		$client = $this->getHttpClient();
 		$client->setUri($url);
+		$client->resetParameters();
 		$client->setParameterGet($params);
 		
 		$responseClass = 'Galahad_Service_Ooyala_Response';
