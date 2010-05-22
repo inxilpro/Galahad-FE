@@ -208,14 +208,29 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 		);
 		
 		// Subscription
+		$intervalLength = $transaction->getIntervalLength();
+		$intervalUnit = $transaction->getIntervalUnit();
+		if (Galahad_Payment_Transaction_Subscription::INTERVAL_UNIT_DAYS == $intervalUnit && $intervalLength < 7) {
+			throw new Galahad_Payment_Adapter_Exception('Daily intervals must be more than 7 days.');
+		}
+		
+		$startDate = $transaction->getStartDate();
+		$startDate->setTimezone('America/Denver');
+		$startDate = $startDate->toString('YYYY-MM-dd');
+		
+		$totalOccurrences = $transaction->getTotalOccurrences();
+		if (null == $totalOccurrences) {
+			$totalOccurrences = 9999;
+		}
+		
 		$parameters['subscription'] = array(
-			'paymentSchedule' => array( // FIXME:
+			'paymentSchedule' => array(
 				'interval' => array(
-					'length' => 1,
-					'unit' => 'months',
+					'length' => $intervalLength,
+					'unit' => $intervalUnit,
 				),
-				'startDate' => '2010-07-03',
-				'totalOccurrences' => '9999',
+				'startDate' => $startDate,
+				'totalOccurrences' => $totalOccurrences,
 			),
 			'amount' => $transaction->getAmount(),
 		);

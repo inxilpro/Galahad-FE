@@ -124,7 +124,7 @@ class Galahad_Payment_Adapter_Response_AuthorizeNet_ARB extends Galahad_Payment_
 	 * @param stdClass $data
 	 * @return array
 	 */
-	protected function _parseData(stdClass $data)
+	protected function _parseData($data)
 	{
 		$result = $data->ARBCreateSubscriptionResult;
 		
