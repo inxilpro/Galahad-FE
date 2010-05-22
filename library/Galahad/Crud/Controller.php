@@ -68,19 +68,11 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
 	 * @var Zend_Form
 	 */
 	private $_form = null;
-	
-	/**
-	 * Index just points to listAction
-	 */
-	public function indexAction()
-    {
-        $this->_forward('list');
-    }
     
     /**
      * Lists all entities
      */
-	public function listAction()
+	public function indexAction()
     {
     	$dm = new $this->_dataMapperClass();
     	
@@ -148,7 +140,7 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
     		 ->setMethod('post');
 		
     	$defaults = $entity->toArray();   
-    	$defaults = $this->_processDefaults($defaults);
+    	$defaults = $this->_processDefaults($defaults, $form, $entity);
     		 
     	$form->setDefaults($defaults);
     	$this->_save($form, self::UPDATE, $entity);
@@ -184,19 +176,12 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
 			
 			// Manipulate Data
 			unset($data['submit']);
-			$data = $this->_processData($data);
+			$data = $this->_processData($data, $form);
+			if (!$data) {
+				return false;
+			}
 			
 			$entity->reset($data);
-			
-			// Build ID
-    		require_once 'Zend/Filter/Word/UnderscoreToCamelCase.php';
-			$filter = new Zend_Filter_Word_UnderscoreToCamelCase();
-			
-	    	$id = array();
-	    	foreach ((array) $this->_primaryKey as $key) {
-	    		$getter = 'get' . $filter->filter($key);
-	    		$id[$key] = $entity->$getter();
-	    	}
 			
 	    	// Save
 	    	if (self::INSERT == $action) {
@@ -206,9 +191,19 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
 	    			throw new Galahad_Exception('There was an error adding the ' . $this->_singular);
 	    		}
 	    	} else if (self::UPDATE == $action) {
-	    		if ($entity->getDataMapper()->update($id, $entity)) {
+	    		if ($entity->getDataMapper()->update($entity)) {
 	    			$this->_helper->flashMessenger("{$this->_singular} Updated!");
 	    		}
+	    	}
+	    	
+    		// Build ID
+    		require_once 'Zend/Filter/Word/UnderscoreToCamelCase.php';
+			$filter = new Zend_Filter_Word_UnderscoreToCamelCase();
+			
+	    	$id = array();
+	    	foreach ((array) $this->_primaryKey as $key) {
+	    		$getter = 'get' . $filter->filter($key);
+	    		$id[$key] = $entity->$getter();
 	    	}
 	    	
 			$this->_helper->redirector->gotoSimple('edit', null, null, $id);
@@ -222,16 +217,18 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
      * Override this if you need to process the form defaults before displaying
      * @param array $defaults
      */
-    protected function _processDefaults($defaults)
+    protected function _processDefaults($defaults, Zend_Form $form, Galahad_Model_Entity $entity)
     {
     	return $defaults;
     }
     
     /**
      * Override this if you need to process submitted data before saving
+     * 
      * @param array $data
+     * @return array|false
      */
-    protected function _processData($data)
+    protected function _processData(array $data, Zend_Form $form)
     {
     	return $data;
     }
