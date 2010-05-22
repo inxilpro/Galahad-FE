@@ -95,8 +95,16 @@ abstract class Galahad_Model_DataMapper_DbTable extends Galahad_Model_DataMapper
 	 */
 	public function insert(Galahad_Model_Entity $entity)
 	{
-		$data = $this->_prepData($data->toArray());
-		return $this->getDbTable()->insert($data);
+		$data = $this->_prepData($entity->toArray(), $entity);
+		$r = $this->getDbTable()->insert($data);
+		
+		// TODO: There might be a better way to go about this.
+		if (method_exists($entity, 'setId')) {
+			$entity->setId($r);
+		}
+		
+		$this->_postSave($entity);
+		return $r;
 	}
 	
 	/**
@@ -110,8 +118,10 @@ abstract class Galahad_Model_DataMapper_DbTable extends Galahad_Model_DataMapper
 	{
 		$id = $entity->getId();
 		$where = $this->_buildPrimaryKeyWhere($id);
-		$data = $this->_prepData($entity->toArray());
-		return (1 == $this->getDbTable()->update($data, $where));
+		$data = $this->_prepData($entity->toArray(), $entity);
+		$r = (1 == $this->getDbTable()->update($data, $where));
+		$this->_postSave($entity);
+		return $r;
 	}
 	
 	/**
@@ -167,7 +177,7 @@ abstract class Galahad_Model_DataMapper_DbTable extends Galahad_Model_DataMapper
 		$id = $this->_normalizeId($id);
 		$where = array();
 		foreach ($id as $column => $value) {
-			$where[] = $this->getAdapter()->quoteInto("{$column} = ?", $value);
+			$where[] = $this->getDbTable()->getAdapter()->quoteInto("{$column} = ?", $value);
 		}
 		
 		return $where;
@@ -185,7 +195,7 @@ abstract class Galahad_Model_DataMapper_DbTable extends Galahad_Model_DataMapper
 		$primary = $this->getDbTable()->info(Zend_Db_Table::PRIMARY);
 		
 		if (!is_array($id)) {
-			$id = array($primary[0] => $id);
+			$id = array(current($primary) => $id);
 		}
 		if (count($id) != count($primary)) {
 			throw new Galahad_Model_Exception('Primary key is an invalid length');

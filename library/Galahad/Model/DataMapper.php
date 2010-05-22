@@ -104,16 +104,34 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	 * This method is meant to be subclassed by concrete data mappers.
 	 * It's useful when you need to prepare data before insert/update.
 	 * 
+	 * @todo This should be _prepData($entity) but that might break BC
 	 * @param array $data
 	 * @return array
 	 */
-	protected function _prepData(array $data)
+	protected function _prepData(array $data, Galahad_Model_Entity $entity)
 	{
 		return $data;
 	}
 	
 	/**
+	 * Act on data once it's been saved
+	 * 
+	 * This method is meant to be subclassed by concrete data mappers.
+	 * It's useful when you need to do something once the entity has been saved,
+	 * particularly if you need its ID.
+	 * 
+	 * @param array $data
+	 * @return array
+	 */
+	protected function _postSave(Galahad_Model_Entity $entity)
+	{
+		
+	}
+	
+	/**
 	 * Insert an Entity into storage
+	 * 
+	 * @todo Should be a concrete implementation that calls _prepData and _postSave
 	 * @param Galahad_Model_Entity $entity
 	 * @return mixed ID/Primary Key
 	 */
@@ -122,6 +140,7 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	/**
 	 * Update an Entity in storage
 	 * 
+	 * @todo Should be a concrete implementation that calls _prepData and _postSave
 	 * @param mixed $id
 	 * @param Galahad_Model_Entity $entity
 	 * @return boolean

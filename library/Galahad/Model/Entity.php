@@ -148,8 +148,16 @@ abstract class Galahad_Model_Entity
     	$filter = new Zend_Filter_Word_UnderscoreToCamelCase();
     	foreach ($this->_data as $key => $value) {
     		$method = 'get' . $filter->filter($key);
-    		// TODO: Call toArray on returned object if instanceof Galahad_Model_Entity
-    		$data[$key] = $this->$method(); 
+    		$value = $this->$method();
+    		
+    		/*
+    		 * FIXME: 
+    		if ($value instanceof Galahad_Model_Entity) {
+    			$value = $value->toArray();
+    		}
+    		*/
+    		
+    		$data[$key] = $value; 
     	}
     	
     	return $data;
