@@ -152,7 +152,7 @@ abstract class Galahad_Model_DataMapper extends Galahad_Model
 	 * @param Galahad_Model_Entity $entity
 	 */
 	public function delete(Galahad_Model_Entity $entity)
-	{
+	{		
 		if (!$id = $entity->getId()) {
     		// TODO: Test this
     		// TODO: Create a new exception?

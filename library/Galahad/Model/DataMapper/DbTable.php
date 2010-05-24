@@ -131,7 +131,7 @@ abstract class Galahad_Model_DataMapper_DbTable extends Galahad_Model_DataMapper
 	public function deleteById($id)
 	{
 		$where = $this->_buildPrimaryKeyWhere($id);
-		return (1 == $this->delete($where));
+		return (1 == $this->getDbTable()->delete($where));
 	}
 	
 	/**
