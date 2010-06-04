@@ -39,6 +39,13 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
 	protected $_entityClass, $_dataMapperClass;
 	
 	/**
+	 * Shared mapper
+	 * 
+	 * @var $_dataMapper Galahad_Model_DataMapper
+	 */
+	protected $_dataMapper;
+	
+	/**
 	 * Primary key for models
 	 * @var string|array
 	 */
@@ -149,6 +156,80 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
     	$this->view->entity = $entity;
     }
     
+	public function deleteAction()
+    {
+    	$entity = $this->_getEntity();
+    	if (!$entity) {
+    		return;
+    	}
+		
+    	$title = "Update {$this->_singular}";
+    	$this->view->headTitle($title);
+		$this->view->placeholder('title')->set($title);
+    	
+    	$session = new Zend_Session_Namespace(__CLASS__);
+    	if (!isset($session->nonce)) {
+    		$session->nonce = rand(0, PHP_INT_MAX);
+    	}
+    	
+    	$nonce = $this->_request->getPost('nonce');
+    	$confirmation = $this->_request->getPost('confirm');
+    	if ('yes' == $confirmation && $nonce == $session->nonce) {
+    		unset($session->nonce);
+    		$dm = $this->_getDataMapper();
+    		$dm->delete($entity);
+    		$this->_helper->flashMessenger("{$this->_singular} Deleted.");
+    		$this->_helper->redirector('index');
+			return;
+    	}
+    	
+    	$form = new Zend_Form();
+    	$form->addElement('hidden', 'nonce', array(
+    		'value' => $session->nonce,
+		));
+		
+		$form->addElement('checkbox', 'confirm', array(
+			'checkedValue' => 'yes',
+			'label' => 'Check to confirm: ',
+		));
+		
+		$form->addElement('submit', 'submit', array(
+			'required' => false,
+			'ignore' => true,
+			'label' => 'Delete', // TODO: translate
+		));
+		
+		$this->view->form = $form;
+		$this->view->entity = $entity;
+    }
+    
+    /**
+     * Gets an entity or redirects to _insert
+     * 
+     * @return Galahad_Model_Entity
+     */
+    protected function _getEntity()
+    {
+    	$primaryKey = array();
+    	foreach ((array) $this->_primaryKey as $key) {
+    		if (!$primaryKey[$key] = $this->getRequest()->getParam($key, false)) {
+				$this->_helper->redirector('insert');
+			}
+    	}
+    	if (1 == count($primaryKey)) {
+    		$primaryKey = $primaryKey[$key];
+    	}
+		
+		$dm = $this->_getDataMapper();
+		if (!$entity = $dm->fetchById($primaryKey)) {
+			$this->_helper->flashMessenger("No Such {$this->_singular} Exists."); // TODO: Translate
+			$this->_helper->redirector('insert');
+			return;
+		}
+		
+		return $entity;
+    }
+    
     /**
      * Save data
      * 
@@ -244,6 +325,15 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
     	}
     	
     	return $this->_form;
+    }
+    
+    protected function _getDataMapper()
+    {
+    	if (null == $this->_dataMapper) {
+    		$this->_dataMapper = new $this->_dataMapperClass();
+    	}
+    	
+    	return $this->_dataMapper;
     }
 	
 	/**
