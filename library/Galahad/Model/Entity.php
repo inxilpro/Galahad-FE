@@ -330,7 +330,23 @@ abstract class Galahad_Model_Entity
     	if (null === $this->_resourceId) {
     		$filter = new Zend_Filter_Word_SeparatorToSeparator('_', '.');
     		$className = strtolower(get_class($this));
-    		$this->setResourceId('model:' . $filter->filter(str_replace('model_', '', $className)));
+    		$resourceId = 'model:' . $filter->filter(str_replace('model_', '', $className));
+    		
+    		// Append model's ID if one exists
+    		$id = $this->getId();
+    		if (is_array($id)) {
+    			ksort($id);
+    			$idString = '';
+    			foreach ($id as $key => $value) {
+    				$idString .= "{$key}-{$value}-";
+    			}
+    			$id = preg_replace('/[^a-z0-9-]/', '', strtolower(rtrim($idString, '-')));
+    		}
+    		if (!empty($id)) {
+    			$resourceId .= ".{$id}";
+    		}
+    		
+    		$this->setResourceId($resourceId);
     	}
     	
     	return $this->_resourceId;
