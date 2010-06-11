@@ -119,6 +119,10 @@ class Galahad_Controller_Plugin_Acl extends Zend_Controller_Plugin_Abstract
 		$roleName = $this->getRole();
 		
 		if (!$this->_acl->isAllowed($roleName, $resourceName, 'dispatch')) {
+			// TODO: There is currently no way to cancel the dispatch loop from here,
+			//       so this is a necessary evil.  Hopefully this will change in a future
+			//       version of the Zend Framework.
+			$request->setActionName('index')->setControllerName('error');
 			throw new Galahad_Acl_Exception("Role '{$roleName}' is not allowed to access '{$resourceName}'.");
 		}
 	}
