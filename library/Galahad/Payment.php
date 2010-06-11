@@ -110,6 +110,7 @@ class Galahad_Payment
             unset($config['adapterNamespace']);
         }
 
+        // TODO: Use a filter here
         $adapterName = $adapterNamespace . '_';
         $adapterName .= str_replace(' ', '_', ucwords(str_replace('_', ' ', strtolower($adapter))));
 
