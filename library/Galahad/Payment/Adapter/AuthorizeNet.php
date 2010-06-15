@@ -311,7 +311,7 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 		}
 		
 		$result = $client->ARBCreateSubscription($parameters);
-		$response = new Galahad_Payment_Adapter_Response_AuthorizeNet_ARB($result, $parameters);
+		$response = new Galahad_Payment_Adapter_Response_AuthorizeNet_ARB($result->ARBCreateSubscriptionResult, $parameters);
 		
 		if ($subscriptionId = $response->getSubscriptionId()) {
 			$transaction->setSubscriptionId($subscriptionId);
@@ -328,7 +328,22 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 	 */
 	public function unsubscribe(Galahad_Payment_Transaction_Subscription $transaction)
 	{
+		$client = $this->getSoapClient();
+		$parameters = array();
 		
+		// Authentication
+		$parameters['merchantAuthentication'] = array(
+			'name' => $this->_apiLoginId, 
+			'transactionKey' => $this->_apiTransactionKey,
+		);
+		
+		// Subscription ID
+		$parameters['subscriptionId'] = $transaction->getSubscriptionId();
+		
+		$result = $client->ARBCancelSubscription($parameters);
+		$response = new Galahad_Payment_Adapter_Response_AuthorizeNet_ARB($result->ARBCancelSubscriptionResult, $parameters);
+		
+		return $response;
 	}
 	
 	/**

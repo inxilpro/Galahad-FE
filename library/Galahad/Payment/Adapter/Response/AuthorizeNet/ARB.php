@@ -126,18 +126,16 @@ class Galahad_Payment_Adapter_Response_AuthorizeNet_ARB extends Galahad_Payment_
 	 */
 	protected function _parseData($data)
 	{
-		$result = $data->ARBCreateSubscriptionResult;
-		
-		if ('OK' == strtoupper($result->resultCode)) {
+		if ('OK' == strtoupper($data->resultCode)) {
 			$this->_code = self::CODE_APPROVED;
 		}
 		
-		$this->_responseCode = $result->messages->MessagesTypeMessage->code;
-		$this->_adapterMessage = $result->messages->MessagesTypeMessage->text;
+		$this->_responseCode = $data->messages->MessagesTypeMessage->code;
+		$this->_adapterMessage = $data->messages->MessagesTypeMessage->text;
 		$this->_message = $this->_adapterMessage;
 		
-		if ($this->isApproved()) {
-			$this->_subscriptionId = $result->subscriptionId;
+		if ($this->isApproved() && isset($data->subscriptionId)) {
+			$this->_subscriptionId = $data->subscriptionId;
 		}
 		
 		// TODO: Set messages on some of these?
