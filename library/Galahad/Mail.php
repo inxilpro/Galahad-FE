@@ -167,7 +167,7 @@ class Galahad_Mail extends Zend_Mail
     {
     	$html = parent::getBodyHtml($htmlOnly);
     	if (!$html) {
-    		$html = $this->_render($this->_viewScript, 'phtml');
+    		$html = $this->_render($this->_viewScript);
     		$html = new Zend_Mime_Part($html);
 	        $html->encoding = $this->_encoding;
 	        $html->type = Zend_Mime::TYPE_HTML;
@@ -178,16 +178,17 @@ class Galahad_Mail extends Zend_Mail
     	return $html;
     }
     
-    protected function _render($viewScript, $type = 'phtml')
+    protected function _render($viewScript, $type = null)
     {
     	$rendered = null;
     	
     	if ($view = $this->getView()) {
-    		$rendered = $view->render("{$viewScript}.{$type}");
+    		$extension = ($type ? "{$type}.phtml" : 'phtml');
+    		$rendered = $view->render("{$viewScript}.{$extension}");
     	}
     	
     	// TODO: Allow for text layouts
-    	if ('phtml' == $type && $layout = $this->getLayout()) {
+    	if (null == $type && $layout = $this->getLayout()) {
     		$layout->content = $rendered;
     		$rendered = $layout->render();
     	}
