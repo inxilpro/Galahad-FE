@@ -106,10 +106,15 @@ abstract class Galahad_Model_Entity
      * Resets the entity with new data
      * 
      * @param array $data
+     * @param bool $fullReset
      * @return Galahad_Model_Entity
      */
-    public function reset(array $data)
+    public function reset(array $data, $fullReset = true)
     {
+    	if (true === $fullReset) {
+    		$this->_data = array();
+    	}
+    	
     	$filter = new Zend_Filter_Word_UnderscoreToCamelCase();
         foreach ($data as $property => $value) {
             $property = $filter->filter($property);
