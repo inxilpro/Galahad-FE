@@ -405,7 +405,12 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 	public function getSoapClient()
 	{
 		if (null == $this->_soapClient) {
-			$this->_soapClient = new Zend_Soap_Client("https://apitest.authorize.net/soap/v1/Service.asmx?WSDL", array(
+			$url = 'https://api.authorize.net/soap/v1/Service.asmx?WSDL';
+			if (self::MODE_TEST == $this->getMode()) {
+				$url = 'https://apitest.authorize.net/soap/v1/Service.asmx?WSDL';
+			}
+			
+			$this->_soapClient = new Zend_Soap_Client($url, array(
 				'soap_version' => SOAP_1_1,
 			));
 		}
