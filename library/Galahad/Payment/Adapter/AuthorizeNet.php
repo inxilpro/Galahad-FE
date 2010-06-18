@@ -125,6 +125,7 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 	/**
 	 * Set the API URL
 	 * 
+	 * @todo Take into consideration REST APIs too
 	 * @param string $url
 	 */
 	public function setApiUrl($url)
@@ -223,6 +224,12 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 			$totalOccurrences = 9999;
 		}
 		
+		$trialAmount = $transaction->getTrialAmount();
+		$trialOccurrences = $transaction->getTrialOccurrences();
+		if (($trialAmount || $trialOccurrences) && !($trialAmount && $trialOccurrences)) {
+			throw new Galahad_Payment_Adapter_Exception('Both trial occurrences and amount must be set for trial transactions.');
+		}
+		
 		$parameters['subscription'] = array(
 			'paymentSchedule' => array(
 				'interval' => array(
@@ -234,6 +241,11 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 			),
 			'amount' => $transaction->getAmount(),
 		);
+		
+		if ($trialOccurrences && $trialAmount) {
+			$parameters['subscription']['paymentSchedule']['trialOccurrences'] = $trialOccurrences;
+			$parameters['subscription']['trialAmount'] = $trialAmount;
+		}
 		
 		if (null !== ($subscriptionName = $transaction->getSubscriptionName())) {
 			$parameters['subscription']['name'] = $subscriptionName;

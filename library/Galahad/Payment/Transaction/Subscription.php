@@ -77,6 +77,18 @@ class Galahad_Payment_Transaction_Subscription extends Galahad_Payment_Transacti
 	protected $_totalOccurrences = 1;
 	
 	/**
+	 * Amount to bill during trial period
+	 * @var float
+	 */
+	protected $_trialAmount;
+	
+	/**
+	 * Total number of times to bill trial amount
+	 * @var integer
+	 */
+	protected $_trialOccurrences;
+	
+	/**
 	 * Set the subscription ID
 	 * 
 	 * @param mixed $subscriptionId
@@ -236,6 +248,58 @@ class Galahad_Payment_Transaction_Subscription extends Galahad_Payment_Transacti
 	public function getTotalOccurrences()
 	{
 		return $this->_totalOccurrences;
+	}
+	
+	/**
+	 * Set the trial amount
+	 * 
+	 * @param float|null $trialAmount
+	 * @return Galahad_Payment_Transaction_Subscription
+	 */
+	public function setTrialAmount($trialAmount)
+	{
+		if (0 === $trialAmount) {
+			throw new InvalidArgumentException('Trial amount must be greater than 0, or NULL.');
+		}
+		
+		$this->_trialAmount = $trialAmount;
+		return $this;
+	}
+	
+	/**
+	 * Ge the trial amount
+	 * 
+	 * @return float|null NULL = no trial
+	 */
+	public function getTrialAmount()
+	{
+		return $this->_trialAmount;
+	}
+	
+	/**
+	 * Set the number of times the subscription should charge the trial fee
+	 * 
+	 * @param int|null $trialOccurrences
+	 * @return Galahad_Payment_Transaction_Subscription
+	 */
+	public function setTrialOccurrences($trialOccurrences)
+	{
+		if (0 === $trialOccurrences) {
+			throw new InvalidArgumentException('Trial occurrences must be greater than 0, or NULL.');
+		}
+		
+		$this->_trialOccurrences = $trialOccurrences;
+		return $this;
+	}
+	
+	/**
+	 * Ge the number of times the subscription should charge the trial fee
+	 * 
+	 * @return int|null NULL = unlimited
+	 */
+	public function getTrialOccurrences()
+	{
+		return $this->_trialOccurrences;
 	}
 }
 
