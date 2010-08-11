@@ -3,6 +3,11 @@ Galahad Framework Extension
 
 The Galahad Framework Extension is a library of code that extends the Zend Framework.  Some of the projects in here will eventually be proposed to the Zend Framework (and migrated there if accepted), some will not (the Modeling architecture, for example, because Zend has stated many times that there won't be a Zend_Model class).
 
+WARNING
+-------
+
+Please note that this 'README' file is out of date.  A lot has changed in most of these components.  I'll try to throw together new examples/instructions when I get a chance.
+
 Main Components
 ---------------
 
