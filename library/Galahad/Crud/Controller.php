@@ -327,6 +327,12 @@ abstract class Galahad_Crud_Controller extends Zend_Controller_Action
     	return $this->_form;
     }
     
+    public function setForm(Zend_Form $form)
+    {
+    	$this->_form = $form;
+    	return $this;
+    }
+    
     protected function _getDataMapper()
     {
     	if (null == $this->_dataMapper) {
