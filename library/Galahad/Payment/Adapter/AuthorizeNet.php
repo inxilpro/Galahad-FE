@@ -167,7 +167,7 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 	}
 	
 	/**
-	 * Capture a transaction (by default auth + capture)
+	 * Capture a transaction
 	 *
 	 * @param Galahad_Gateway_Transaction $transaction
 	 * @param bool $authorize
@@ -217,7 +217,7 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 		
 		$startDate = $transaction->getStartDate();
 		$startDate->setTimezone('America/Denver');
-		$startDate = $startDate->toString('YYYY-MM-dd');
+		$startDate = $startDate->toString('yyyy-MM-dd');
 		
 		$totalOccurrences = $transaction->getTotalOccurrences();
 		if (null == $totalOccurrences) {
@@ -366,7 +366,7 @@ class Galahad_Payment_Adapter_AuthorizeNet extends Galahad_Payment_Adapter_Abstr
 	 */
 	public function changeSubscription(Galahad_Payment_Transaction_Subscription $transaction)
 	{
-		
+		// FIXME
 	}
 	
 	/**

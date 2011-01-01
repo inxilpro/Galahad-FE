@@ -179,7 +179,9 @@ abstract class Galahad_Payment_Adapter_Abstract
      * @return Galahad_Payment_Adapter_Response
      */
 	public function process(Galahad_Payment_Transaction $transaction) 
-	{}
+	{
+		throw new Exception(__CLASS__ . '::' . __METHOD__ . ' is not supported in this adapter.');
+	}
 	
 	/**
      * Authorize a transaction
@@ -192,7 +194,9 @@ abstract class Galahad_Payment_Adapter_Abstract
      * @return Galahad_Payment_Adapter_Response
      */
 	public function authorize(Galahad_Payment_Transaction $transaction) 
-	{}
+	{
+		throw new Exception(__CLASS__ . '::' . __METHOD__ . ' is not supported in this adapter.');
+	}
 	
 	/**
      * Capture a transaction
@@ -204,7 +208,9 @@ abstract class Galahad_Payment_Adapter_Abstract
      * @return Galahad_Payment_Adapter_Response
      */
 	public function capture(Galahad_Payment_Transaction $transaction) 
-	{}
+	{
+		throw new Exception(__CLASS__ . '::' . __METHOD__ . ' is not supported in this adapter.');
+	}
 	
 	/**
      * Refund a transaction
@@ -216,7 +222,9 @@ abstract class Galahad_Payment_Adapter_Abstract
      * @return Galahad_Payment_Adapter_Response
      */
 	public function refund(Galahad_Payment_Transaction $transaction) 
-	{}
+	{
+		throw new Exception(__CLASS__ . '::' . __METHOD__ . ' is not supported in this adapter.');
+	}
 	
 	/**
      * Void a transaction
@@ -227,34 +235,48 @@ abstract class Galahad_Payment_Adapter_Abstract
      * @return Galahad_Payment_Adapter_Response
      */
 	public function void(Galahad_Payment_Transaction $transaction) 
-	{}
+	{
+		throw new Exception(__CLASS__ . '::' . __METHOD__ . ' is not supported in this adapter.');
+	}
 	
 	/**
 	 * Create a subscription
+	 * 
+	 * Available when Galahad_Payment::FEATURE_RECURRING is available
 	 * 
 	 * @param Galahad_Payment_Transaction_Subscription $transaction
 	 * @return Galahad_Payment_Adapter_Response
 	 */
 	public function subscribe(Galahad_Payment_Transaction_Subscription $transaction)
-	{}
+	{
+		throw new Exception(__CLASS__ . '::' . __METHOD__ . ' is not supported in this adapter.');
+	}
 	
 	/**
 	 * Cancel a subscription
+	 * 
+	 * Available when Galahad_Payment::FEATURE_RECURRING is available
 	 * 
 	 * @param Galahad_Payment_Transaction_Subscription $transaction
 	 * @return Galahad_Payment_Adapter_Response
 	 */
 	public function unsubscribe(Galahad_Payment_Transaction_Subscription $transaction)
-	{}
+	{
+		throw new Exception(__CLASS__ . '::' . __METHOD__ . ' is not supported in this adapter.');
+	}
 	
 	/**
 	 * Change a subscription
+	 * 
+	 * Available when Galahad_Payment::FEATURE_RECURRING is available
 	 * 
 	 * @param Galahad_Payment_Transaction_Subscription $transaction
 	 * @return Galahad_Payment_Adapter_Response
 	 */
 	public function changeSubscription(Galahad_Payment_Transaction_Subscription $transaction)
-	{}
+	{
+		throw new Exception(__CLASS__ . '::' . __METHOD__ . ' is not supported in this adapter.');
+	}
 	
 	/**
 	 * Send a raw request via the adapter
